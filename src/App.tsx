@@ -13,6 +13,8 @@ import { ActivityFeed } from './views/ActivityFeed'
 import { SlackSettings } from './views/SlackSettings'
 import { LoginView } from './views/LoginView'
 import { InviteAccept } from './views/InviteAccept'
+import { ForgotPassword } from './views/ForgotPassword'
+import { ResetPassword } from './views/ResetPassword'
 import { TeamManagement } from './views/TeamManagement'
 import { AdminDashboard } from './views/AdminDashboard'
 import { useAuthStore } from './store/authStore'
@@ -78,6 +80,8 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/*" element={<PrivateLayout />} />
       </Routes>
     </BootGate>

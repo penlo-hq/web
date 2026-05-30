@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '../lib/api/endpoints'
 import { publicApi } from '../lib/api/client'
@@ -156,6 +156,14 @@ export function LoginView() {
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
+          <div className="text-center">
+            <Link
+              to="/forgot-password"
+              className="text-[12px] text-stone hover:text-ink transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </form>
 
         {googleClientId && (
