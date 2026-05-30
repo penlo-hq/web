@@ -15,6 +15,7 @@ import { LoginView } from './views/LoginView'
 import { InviteAccept } from './views/InviteAccept'
 import { ForgotPassword } from './views/ForgotPassword'
 import { ResetPassword } from './views/ResetPassword'
+import { CompanySignup } from './views/CompanySignup'
 import { TeamManagement } from './views/TeamManagement'
 import { AdminDashboard } from './views/AdminDashboard'
 import { useAuthStore } from './store/authStore'
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/signup" element={<CompanySignup />} />
         <Route path="/*" element={<PrivateLayout />} />
       </Routes>
     </BootGate>

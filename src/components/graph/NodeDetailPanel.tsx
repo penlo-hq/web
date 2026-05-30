@@ -39,8 +39,11 @@ type Props = { selectedId: string | null; onClose: () => void }
 
 type Tab = 'overview' | 'relationships'
 
+type EditDraft = { detail: string; meta: string; is_private: boolean }
+
 export function NodeDetailPanel({ selectedId, onClose }: Props) {
   const nodes = useGraphStore((s) => s.nodes)
+  const updateNode = useGraphStore((s) => s.updateNode)
   const user = useAuthStore((s) => s.user)
   const [detail, setDetail] = useState<NodeDetail | null>(null)
   const [loading, setLoading] = useState(false)
@@ -51,6 +54,40 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
   const [relationships, setRelationships] = useState<NodeRelationship[] | null>(null)
   const [relationshipsLoading, setRelationshipsLoading] = useState(false)
   const [resolving, setResolving] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editDraft, setEditDraft] = useState<EditDraft>({ detail: '', meta: '', is_private: false })
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  const canEdit = user?.role === 'admin' || user?.role === 'team_lead'
+  const canTogglePrivate = user?.role === 'admin' || user?.role === 'team_lead'
+
+  const openEdit = () => {
+    if (!node) return
+    setEditDraft({ detail: node.detail ?? '', meta: node.meta ?? '', is_private: node.is_private ?? false })
+    setSaveError(null)
+    setEditOpen(true)
+  }
+
+  const closeEdit = () => setEditOpen(false)
+
+  const saveEdit = async () => {
+    if (!selectedId) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      const patch: Record<string, unknown> = { detail: editDraft.detail, meta: editDraft.meta }
+      if (canTogglePrivate) patch.is_private = editDraft.is_private
+      const saved = await nodeApi.patch(selectedId, patch)
+      updateNode(selectedId, saved as Partial<import('../../types/graph').GraphNode>)
+      setDetail((d) => d ? { ...d, ...saved } : d)
+      setEditOpen(false)
+    } catch {
+      setSaveError('Save failed. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   useEffect(() => {
     if (!selectedId) {
@@ -128,14 +165,84 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
                 {node?.label ?? ''}
               </h2>
             </div>
-            <button
-              onClick={onClose}
-              className="text-stone hover:text-ink text-lg leading-none mt-0.5 transition-colors"
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-2 mt-0.5">
+              {canEdit && node && (
+                <button
+                  onClick={openEdit}
+                  className="text-[10.5px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+                  aria-label="Edit node"
+                >
+                  Edit
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="text-stone hover:text-ink text-lg leading-none transition-colors"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
           </div>
+
+          {editOpen && (
+            <div className="absolute inset-0 z-10 flex flex-col bg-white/98 backdrop-blur-sm px-5 py-5">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10.5px] uppercase tracking-[0.2em] text-stone">Edit node</span>
+                <button onClick={closeEdit} className="text-stone hover:text-ink text-lg leading-none transition-colors" aria-label="Cancel">×</button>
+              </div>
+              <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-stone mb-1.5">Detail</label>
+                  <textarea
+                    value={editDraft.detail}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, detail: e.target.value }))}
+                    rows={5}
+                    className="w-full text-[13px] text-ink bg-paper border border-mist rounded-md px-3 py-2 focus:outline-none focus:border-graphite resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-stone mb-1.5">Meta</label>
+                  <input
+                    type="text"
+                    value={editDraft.meta}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, meta: e.target.value }))}
+                    className="w-full text-[13px] text-ink bg-paper border border-mist rounded-md px-3 py-2 focus:outline-none focus:border-graphite"
+                  />
+                </div>
+                {canTogglePrivate && (
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-stone">Private</span>
+                    <div
+                      onClick={() => setEditDraft((d) => ({ ...d, is_private: !d.is_private }))}
+                      className={`w-9 h-5 rounded-full transition-colors ${editDraft.is_private ? 'bg-ink' : 'bg-mist'} relative`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editDraft.is_private ? 'translate-x-4' : ''}`} />
+                    </div>
+                  </label>
+                )}
+                {saveError && (
+                  <p className="text-[12px] text-red-500">{saveError}</p>
+                )}
+              </div>
+              <div className="flex gap-3 mt-4 pt-4 border-t border-mist">
+                <button
+                  onClick={closeEdit}
+                  disabled={saving}
+                  className="flex-1 py-2 text-[11px] uppercase tracking-[0.18em] border border-mist rounded-md text-stone hover:text-ink transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  disabled={saving}
+                  className="flex-1 py-2 text-[11px] uppercase tracking-[0.18em] bg-ink text-white rounded-md disabled:bg-mist disabled:text-stone transition-colors"
+                >
+                  {saving ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            </div>
+          )}
 
           {isPersonOrClient && (
             <div className="flex border-b border-mist px-5">
