@@ -1,5 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import { publicApi } from '../../lib/api/client'
 
 type NavItem = { to: string; label: string; sublabel: string; adminOnly?: boolean }
 
@@ -19,8 +20,19 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Sidebar() {
   const user = useAuthStore((s) => s.user)
-  const logout = useAuthStore((s) => s.logout)
+  const clearUser = useAuthStore((s) => s.clearUser)
+  const navigate = useNavigate()
   const items = NAV_ITEMS.filter((n) => !n.adminOnly || user?.role === 'admin')
+
+  async function handleLogout() {
+    try {
+      await publicApi.post('/api/v1/auth/logout')
+    } catch {
+      // best-effort: navigate regardless
+    }
+    clearUser()
+    navigate('/login', { replace: true })
+  }
 
   const firstAdminIdx = items.findIndex((n) => n.adminOnly)
 
@@ -64,7 +76,7 @@ export function Sidebar() {
         <div className="text-[12px] font-medium text-ink truncate">{user?.name}</div>
         <div className="text-[10.5px] text-stone truncate">{user?.email}</div>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="mt-2 text-[10.5px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
         >
           Sign out

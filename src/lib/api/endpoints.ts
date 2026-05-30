@@ -227,8 +227,8 @@ export type InviteInfoDTO = {
 }
 
 export type AuthTokenResponse = {
-  access_token: string
-  refresh_token: string
+  access_token?: string
+  refresh_token?: string
   user: User
 }
 
@@ -248,4 +248,8 @@ export const authApi = {
     admin_password: string
   }): Promise<AuthTokenResponse> =>
     publicApi.post('/api/v1/auth/company', body).then((r) => r.data),
+  me: (): Promise<{ user: User }> =>
+    publicApi.get('/api/v1/auth/me').then((r) => r.data),
+  logout: (): Promise<void> =>
+    publicApi.post('/api/v1/auth/logout').then(() => undefined),
 }

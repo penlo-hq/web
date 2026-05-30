@@ -1,37 +1,33 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import type { User } from '../types/graph'
-import { api } from '../lib/api/client'
+import { publicApi } from '../lib/api/client'
 
 type AuthState = {
   user: User | null
-  accessToken: string | null
-  refreshToken: string | null
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  setTokens: (access: string, refresh?: string) => void
+  isLoaded: boolean
+  bootstrap: () => Promise<void>
   setUser: (user: User) => void
+  clearUser: () => void
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
+  isLoaded: false,
 
-      login: async (email, password) => {
-        const { data } = await api.post('/api/v1/auth/login', { email, password })
-        set({ user: data.user, accessToken: data.access_token, refreshToken: data.refresh_token })
-      },
+  bootstrap: async () => {
+    try {
+      localStorage.removeItem('penlo-auth')
+    } catch {
+      // ignore (SSR / disabled storage)
+    }
+    try {
+      const { data } = await publicApi.get('/api/v1/auth/me')
+      set({ user: data.user, isLoaded: true })
+    } catch {
+      set({ user: null, isLoaded: true })
+    }
+  },
 
-      logout: () => set({ user: null, accessToken: null, refreshToken: null }),
-
-      setTokens: (access, refresh) =>
-        set((s) => ({ accessToken: access, refreshToken: refresh ?? s.refreshToken })),
-
-      setUser: (user) => set({ user }),
-    }),
-    { name: 'penlo-auth', partialize: (s) => ({ accessToken: s.accessToken, refreshToken: s.refreshToken, user: s.user }) },
-  ),
-)
+  setUser: (user) => set({ user }),
+  clearUser: () => set({ user: null }),
+}))

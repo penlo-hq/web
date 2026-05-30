@@ -8,7 +8,6 @@ type Status = 'loading' | 'invalid' | 'valid' | 'submitting'
 export function InviteAccept() {
   const { token } = useParams<{ token: string }>()
   const navigate = useNavigate()
-  const setTokens = useAuthStore((s) => s.setTokens)
   const setUser = useAuthStore((s) => s.setUser)
 
   const [status, setStatus] = useState<Status>('loading')
@@ -54,7 +53,6 @@ export function InviteAccept() {
     setStatus('submitting')
     try {
       const data = await authApi.acceptInvite(token, name.trim(), password)
-      setTokens(data.access_token, data.refresh_token)
       setUser(data.user)
       navigate('/brain/company')
     } catch (e: unknown) {

@@ -41,8 +41,8 @@ class BrainWSClient {
   }
 
   private async _open(): Promise<void> {
-    const token = useAuthStore.getState().accessToken
-    if (!token || !this.companyId) return
+    const user = useAuthStore.getState().user
+    if (!user || !this.companyId) return
 
     let ticket: string
     try {
