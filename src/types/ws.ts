@@ -16,5 +16,7 @@ export type WSMessage =
       user_name: string | null
     } }
   | { type: 'agent_action'; payload: { action: string; status: 'started' | 'completed' | 'failed'; node_id?: string } }
+  | { type: 'broadcast_pending'; payload: { count: number } }
+  | { type: 'broadcast_acted'; payload: { id: string; action: 'approved' | 'discarded' } }
   | { type: 'ping' }
   | { type: 'pong' }

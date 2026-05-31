@@ -1,8 +1,17 @@
+import { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import { useOutboxStore } from '../../store/outboxStore'
 import { publicApi } from '../../lib/api/client'
+import { broadcastsApi } from '../../lib/api/endpoints'
 
-type NavItem = { to: string; label: string; sublabel: string; adminOnly?: boolean }
+type NavItem = {
+  to: string
+  label: string
+  sublabel: string
+  adminOnly?: boolean
+  adminOrLead?: boolean
+}
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/brain/ask', label: 'Ask Brain', sublabel: 'Query in plain English' },
@@ -13,16 +22,38 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/drafts', label: 'Drafts', sublabel: 'Pending comms' },
   { to: '/activity', label: 'Activity', sublabel: 'What the brain just learned' },
   { to: '/connect', label: 'Connect App', sublabel: 'Link Penlo device' },
+  { to: '/outbox', label: 'Outbox', sublabel: 'Pending Slack messages', adminOrLead: true },
   { to: '/slack-settings', label: 'Slack', sublabel: 'Manage integration', adminOnly: true },
   { to: '/admin/dashboard', label: 'Admin', sublabel: 'Dashboard', adminOnly: true },
   { to: '/admin/teams', label: 'Teams', sublabel: 'Manage members', adminOnly: true },
 ]
 
+function canSeeOutbox(role: string | undefined): boolean {
+  return role === 'admin' || role === 'team_lead'
+}
+
 export function Sidebar() {
   const user = useAuthStore((s) => s.user)
   const clearUser = useAuthStore((s) => s.clearUser)
   const navigate = useNavigate()
-  const items = NAV_ITEMS.filter((n) => !n.adminOnly || user?.role === 'admin')
+  const pendingCount = useOutboxStore((s) => s.pendingCount)
+  const setPendingCount = useOutboxStore((s) => s.setPendingCount)
+
+  useEffect(() => {
+    if (!canSeeOutbox(user?.role)) {
+      setPendingCount(0)
+      return
+    }
+    broadcastsApi.count()
+      .then((r) => setPendingCount(r.count))
+      .catch((exc) => console.error('outbox count fetch failed', exc))
+  }, [user?.id, user?.role, setPendingCount])
+
+  const items = NAV_ITEMS.filter((n) => {
+    if (n.adminOnly) return user?.role === 'admin'
+    if (n.adminOrLead) return canSeeOutbox(user?.role)
+    return true
+  })
 
   async function handleLogout() {
     try {
@@ -34,7 +65,7 @@ export function Sidebar() {
     navigate('/login', { replace: true })
   }
 
-  const firstAdminIdx = items.findIndex((n) => n.adminOnly)
+  const firstAdminIdx = items.findIndex((n) => n.adminOnly || n.adminOrLead)
 
   return (
     <aside className="w-[220px] shrink-0 h-screen flex flex-col border-r border-mist bg-white">
@@ -61,7 +92,18 @@ export function Sidebar() {
             >
               {({ isActive }) => (
                 <>
-                  <span className="text-[13px] font-medium leading-tight">{item.label}</span>
+                  <span className="text-[13px] font-medium leading-tight flex items-center gap-1.5">
+                    {item.label}
+                    {item.to === '/outbox' && pendingCount > 0 && (
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold ${
+                          isActive ? 'bg-white text-ink' : 'bg-ink text-white'
+                        }`}
+                      >
+                        {pendingCount}
+                      </span>
+                    )}
+                  </span>
                   <span className={`text-[10px] mt-0.5 ${isActive ? 'text-white/60' : 'text-stone'}`}>
                     {item.sublabel}
                   </span>

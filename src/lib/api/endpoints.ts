@@ -86,6 +86,30 @@ export const activityApi = {
     api.get('/api/v1/activity', { params }).then((r) => r.data),
 }
 
+export type PendingBroadcastDTO = {
+  id: string
+  channel_id: string
+  channel_name: string
+  message_text: string
+  node_ids: string[]
+  nodes: { id: string; label: string; type: string }[]
+  created_at: string
+  expires_at: string
+}
+
+export const broadcastsApi = {
+  list: (): Promise<PendingBroadcastDTO[]> =>
+    api.get('/api/v1/broadcasts').then((r) => r.data),
+  patch: (id: string, body: { message_text: string }): Promise<PendingBroadcastDTO> =>
+    api.patch(`/api/v1/broadcasts/${id}`, body).then((r) => r.data),
+  approve: (id: string): Promise<void> =>
+    api.post(`/api/v1/broadcasts/${id}/approve`).then(() => undefined),
+  discard: (id: string): Promise<void> =>
+    api.post(`/api/v1/broadcasts/${id}/discard`).then(() => undefined),
+  count: (): Promise<{ count: number }> =>
+    api.get('/api/v1/broadcasts/count').then((r) => r.data),
+}
+
 export type SlackWorkspaceDTO = {
   id: string
   slack_team_id: string
