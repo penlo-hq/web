@@ -2,6 +2,7 @@ import type { WSMessage } from '../../types/ws'
 import { useGraphStore } from '../../store/graphStore'
 import { useAuthStore } from '../../store/authStore'
 import { useActivityStore } from '../../store/activityStore'
+import { useOutboxStore } from '../../store/outboxStore'
 import { api } from '../api/client'
 
 const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000'
@@ -121,6 +122,12 @@ class BrainWSClient {
         })
         break
       }
+      case 'broadcast_pending':
+        useOutboxStore.getState().setPendingCount(msg.payload.count)
+        break
+      case 'broadcast_acted':
+        useOutboxStore.getState().decrement()
+        break
     }
   }
 
