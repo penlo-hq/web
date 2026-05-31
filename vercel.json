@@ -9,7 +9,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://penlo-enteprisebrain-production.up.railway.app wss://penlo-enteprisebrain-production.up.railway.app https://accounts.google.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://penlo-enteprisebrain-production.up.railway.app wss://penlo-enteprisebrain-production.up.railway.app https://accounts.google.com https://raw.githack.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         },
         {
           "key": "X-Content-Type-Options",
