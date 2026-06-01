@@ -19,6 +19,9 @@ import { ResetPassword } from './views/ResetPassword'
 import { CompanySignup } from './views/CompanySignup'
 import { TeamManagement } from './views/TeamManagement'
 import { AdminDashboard } from './views/AdminDashboard'
+import { LandingView } from './views/LandingView'
+import { PricingView } from './views/PricingView'
+import { OnboardingView } from './views/OnboardingView'
 import { useAuthStore } from './store/authStore'
 import { wsClient } from './lib/ws/client'
 
@@ -64,6 +67,7 @@ function PrivateLayout() {
       <main className="flex-1 min-w-0">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
+            <Route path="/onboarding" element={<OnboardingView />} />
             <Route path="/brain/ask" element={<BrainQuery />} />
             <Route path="/brain/company" element={<CompanyBrain />} />
             <Route path="/brain/me" element={<MyBrain />} />
@@ -88,6 +92,8 @@ export default function App() {
   return (
     <BootGate>
       <Routes>
+        <Route path="/" element={<LandingView />} />
+        <Route path="/pricing" element={<PricingView />} />
         <Route path="/login" element={<LoginView />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

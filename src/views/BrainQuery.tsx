@@ -18,6 +18,8 @@ type ChatMessage =
       citations: Citation[]
       contradictions: Contradiction[]
       subAgent: QueryResult['sub_agent']
+      queryId: string
+      userQuestion: string
       at: number
     }
   | { id: string; role: 'brain-loading'; at: number }
@@ -61,6 +63,8 @@ export function BrainQuery() {
             citations: result.citations ?? [],
             contradictions: result.contradictions ?? [],
             subAgent: result.sub_agent,
+            queryId: result.query_id,
+            userQuestion: question,
             at: Date.now(),
           }),
       )
@@ -253,7 +257,52 @@ function MessageRow({
             </div>
           </div>
         )}
+
+        <QueryFeedbackRow
+          queryId={message.queryId}
+          question={message.userQuestion}
+          answer={message.answer}
+        />
       </div>
+    </div>
+  )
+}
+
+function QueryFeedbackRow({ queryId, question, answer }: { queryId: string; question: string; answer: string }) {
+  const [sent, setSent] = useState<'up' | 'down' | null>(null)
+
+  const submit = async (rating: 'up' | 'down') => {
+    if (sent) return
+    try {
+      await queryApi.feedback({ query_id: queryId, rating, question, answer })
+      setSent(rating)
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return (
+    <div className="mt-3 flex items-center gap-2 pt-2 border-t border-mist">
+      <span className="text-[10px] text-stone uppercase tracking-wider">Helpful?</span>
+      <button
+        type="button"
+        onClick={() => submit('up')}
+        disabled={sent !== null}
+        className={`text-sm px-2 py-0.5 rounded ${sent === 'up' ? 'bg-green-100' : 'hover:bg-paper'}`}
+        aria-label="Thumbs up"
+      >
+        👍
+      </button>
+      <button
+        type="button"
+        onClick={() => submit('down')}
+        disabled={sent !== null}
+        className={`text-sm px-2 py-0.5 rounded ${sent === 'down' ? 'bg-red-100' : 'hover:bg-paper'}`}
+        aria-label="Thumbs down"
+      >
+        👎
+      </button>
+      {sent && <span className="text-[10px] text-stone">Thanks for the feedback</span>}
     </div>
   )
 }

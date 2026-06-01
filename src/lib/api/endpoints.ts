@@ -34,6 +34,13 @@ export const nodeApi = {
 export const queryApi = {
   ask: (question: string, scope: string = 'company'): Promise<QueryResult> =>
     api.post('/api/v1/query', { question, scope }).then((r) => r.data),
+  feedback: (body: {
+    query_id: string
+    rating: 'up' | 'down'
+    comment?: string
+    question?: string
+    answer?: string
+  }) => api.post('/api/v1/query/feedback', body).then((r) => r.data),
 }
 
 export const tasksApi = {

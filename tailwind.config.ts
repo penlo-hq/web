@@ -10,6 +10,7 @@ export default {
         stone: '#6b6b6b',
         mist: '#e6e6e6',
         paper: '#fafafa',
+        canvas: '#f8f8f8',
         amber: { brain: '#b45309', 'brain-bg': '#fdf4e7' },
         blue: { brain: '#1d4ed8', 'brain-bg': '#eff6ff' },
         decision: { fg: '#854d0e', bg: '#fefce8' },
