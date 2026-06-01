@@ -11,6 +11,7 @@ import { Tasks } from './views/Tasks'
 import { Drafts } from './views/Drafts'
 import { ActivityFeed } from './views/ActivityFeed'
 import { Outbox } from './views/Outbox'
+import { Dispatch } from './views/Dispatch'
 import { SlackSettings } from './views/SlackSettings'
 import { LoginView } from './views/LoginView'
 import { InviteAccept } from './views/InviteAccept'
@@ -77,6 +78,7 @@ function PrivateLayout() {
             <Route path="/activity" element={<ActivityFeed />} />
             <Route path="/connect" element={<ConnectApp />} />
             <Route path="/outbox" element={<RequireAdminOrLead><Outbox /></RequireAdminOrLead>} />
+            <Route path="/dispatch" element={<RequireAdminOrLead><Dispatch /></RequireAdminOrLead>} />
             <Route path="/slack-settings" element={<SlackSettings />} />
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
             <Route path="/admin/teams" element={<RequireAdmin><TeamManagement /></RequireAdmin>} />

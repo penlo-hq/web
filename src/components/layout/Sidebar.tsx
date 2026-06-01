@@ -2,8 +2,9 @@ import { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useOutboxStore } from '../../store/outboxStore'
+import { useDispatchStore } from '../../store/dispatchStore'
 import { publicApi } from '../../lib/api/client'
-import { broadcastsApi } from '../../lib/api/endpoints'
+import { broadcastsApi, dispatchApi } from '../../lib/api/endpoints'
 
 type NavItem = {
   to: string
@@ -22,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/drafts', label: 'Drafts', sublabel: 'Pending comms' },
   { to: '/activity', label: 'Activity', sublabel: 'What the brain just learned' },
   { to: '/connect', label: 'Connect App', sublabel: 'Link Penlo device' },
+  { to: '/dispatch', label: 'Dispatch', sublabel: 'Approve agent work', adminOrLead: true },
   { to: '/outbox', label: 'Outbox', sublabel: 'Pending Slack messages', adminOrLead: true },
   { to: '/slack-settings', label: 'Slack', sublabel: 'Manage integration', adminOnly: true },
   { to: '/admin/dashboard', label: 'Admin', sublabel: 'Dashboard', adminOnly: true },
@@ -38,16 +40,22 @@ export function Sidebar() {
   const navigate = useNavigate()
   const pendingCount = useOutboxStore((s) => s.pendingCount)
   const setPendingCount = useOutboxStore((s) => s.setPendingCount)
+  const dispatchCount = useDispatchStore((s) => s.pendingCount)
+  const setDispatchCount = useDispatchStore((s) => s.setPendingCount)
 
   useEffect(() => {
     if (!canSeeOutbox(user?.role)) {
       setPendingCount(0)
+      setDispatchCount(0)
       return
     }
     broadcastsApi.count()
       .then((r) => setPendingCount(r.count))
       .catch((exc) => console.error('outbox count fetch failed', exc))
-  }, [user?.id, user?.role, setPendingCount])
+    dispatchApi.count()
+      .then((r) => setDispatchCount(r.count))
+      .catch((exc) => console.error('dispatch count fetch failed', exc))
+  }, [user?.id, user?.role, setPendingCount, setDispatchCount])
 
   const items = NAV_ITEMS.filter((n) => {
     if (n.adminOnly) return user?.role === 'admin'
@@ -101,6 +109,16 @@ export function Sidebar() {
                         }`}
                       >
                         {pendingCount}
+                      </span>
+                    )}
+                    {item.to === '/dispatch' && dispatchCount > 0 && (
+                      <span
+                        aria-label={`${dispatchCount} dispatches awaiting approval`}
+                        className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold ${
+                          isActive ? 'bg-white text-ink' : 'bg-ink text-white'
+                        }`}
+                      >
+                        {dispatchCount}
                       </span>
                     )}
                   </span>
