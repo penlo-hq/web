@@ -3,6 +3,7 @@ import { useGraphStore } from '../../store/graphStore'
 import { useAuthStore } from '../../store/authStore'
 import { useActivityStore } from '../../store/activityStore'
 import { useOutboxStore } from '../../store/outboxStore'
+import { useDispatchStore } from '../../store/dispatchStore'
 import { api } from '../api/client'
 
 const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000'
@@ -127,6 +128,9 @@ class BrainWSClient {
         break
       case 'broadcast_acted':
         useOutboxStore.getState().decrement()
+        break
+      case 'dispatch_pending':
+        useDispatchStore.getState().setPendingCount(msg.payload.count)
         break
     }
   }
