@@ -12,7 +12,6 @@ export function GraphControls() {
   const nodes = useGraphStore((s) => s.nodes)
   const layoutMode = useGraphStore((s) => s.layoutMode)
   const setLayoutMode = useGraphStore((s) => s.setLayoutMode)
-  const selectedId = useGraphStore((s) => s.selectedId)
 
   const counts = NODE_TYPE_ORDER.reduce<Record<NodeType, number>>((acc, t) => {
     acc[t] = 0
@@ -53,17 +52,15 @@ export function GraphControls() {
         <div className="ml-auto inline-flex border border-mist rounded-lg overflow-hidden">
           {LAYOUT_MODES.map((m) => {
             const isActive = layoutMode === m
-            const disabled = m === 'focus' && !selectedId
             return (
               <button
                 key={m}
-                onClick={() => !disabled && setLayoutMode(m)}
-                disabled={disabled}
+                onClick={() => setLayoutMode(m)}
                 aria-pressed={isActive}
                 aria-label={`Layout mode: ${m}`}
                 className={`px-3 py-1 text-[11px] capitalize transition-colors ${
                   isActive ? 'bg-ink text-white' : 'bg-white text-graphite hover:text-ink'
-                } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                }`}
               >
                 {m}
               </button>

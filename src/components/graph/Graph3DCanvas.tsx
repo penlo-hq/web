@@ -82,6 +82,24 @@ export function Graph3DCanvas({
     return new THREE.Vector3(cx / count, cy / count, cz / count)
   }, [layoutMode, selectedId, focusedIds, nodes, nodeZ, width, height])
 
+  const focusFraming = useMemo(() => {
+    if (layoutMode !== 'focus' || !selectedId || !focusedIds) return null
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    for (const n of nodes) {
+      if (!focusedIds.has(n.id) || n.x == null || n.y == null) continue
+      const x = n.x - width / 2
+      const y = -(n.y - height / 2)
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x)
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y)
+    }
+    if (minX === Infinity) return null
+    const rx = (maxX - minX) / 2 + 60
+    const ry = (maxY - minY) / 2 + 60
+    const radius = Math.sqrt(rx * rx + ry * ry)
+    const fovRad = (55 * Math.PI) / 180
+    return Math.max(200, Math.min(1400, (radius / Math.tan(fovRad / 2)) * 1.2))
+  }, [layoutMode, selectedId, focusedIds, nodes, width, height])
+
   const clusterHalos = useMemo(() => {
     if (layoutMode !== 'cluster') return []
     const byTeam = new Map<string, { x: number; y: number; count: number }>()
@@ -111,7 +129,7 @@ export function Graph3DCanvas({
       <pointLight position={[280, 280, 380]} intensity={0.7} />
       <pointLight position={[-180, -140, -240]} intensity={0.18} />
 
-      <FocusCameraTarget target={focusCentroid} />
+      <FocusCameraTarget target={focusCentroid} distance={focusFraming ?? 700} />
 
       {clusterHalos.map((h) => (
         <mesh key={h.teamId} position={[h.cx, h.cy, -10]}>
@@ -169,28 +187,39 @@ export function Graph3DCanvas({
   )
 }
 
-function FocusCameraTarget({ target }: { target: THREE.Vector3 | null }) {
-  const { controls } = useThree() as unknown as { controls: { target: THREE.Vector3; update: () => void } | undefined }
+function FocusCameraTarget({ target, distance }: { target: THREE.Vector3 | null; distance: number }) {
+  const { camera, controls } = useThree() as unknown as {
+    camera: THREE.Camera
+    controls: { target: THREE.Vector3; update: () => void } | undefined
+  }
   const reducedMotion = usePrefersReducedMotion()
   const targetRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0))
   const desiredRef = useRef<THREE.Vector3 | null>(null)
+  const desiredCamRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 700))
 
   useEffect(() => {
     desiredRef.current = target
-    if (reducedMotion && target && controls) {
-      controls.target.copy(target)
-      controls.update()
+    desiredCamRef.current = target
+      ? new THREE.Vector3(target.x, target.y, target.z + distance)
+      : new THREE.Vector3(0, 0, 700)
+    if (reducedMotion) {
+      if (controls) {
+        controls.target.copy(target ?? new THREE.Vector3(0, 0, 0))
+        controls.update()
+      }
+      camera.position.copy(desiredCamRef.current)
     }
-  }, [target, reducedMotion, controls])
+  }, [target, distance, reducedMotion, controls, camera])
 
   useFrame(() => {
-    const desired = desiredRef.current ?? new THREE.Vector3(0, 0, 0)
     if (reducedMotion) return
+    const desired = desiredRef.current ?? new THREE.Vector3(0, 0, 0)
     targetRef.current.lerp(desired, 0.12)
     if (controls) {
       controls.target.lerp(desired, 0.12)
       controls.update()
     }
+    camera.position.lerp(desiredCamRef.current, 0.08)
   })
 
   return (

@@ -90,7 +90,7 @@ export const useGraphStore = create<GraphState>((set) => ({
 
   setViewMode: (mode, teamId) =>
     set({ viewMode: mode, activeTeamId: teamId ?? null, selectedId: null, layoutMode: 'free' }),
-  setLayoutMode: (mode) => set({ layoutMode: mode }),
+  setLayoutMode: (mode) => set({ layoutMode: mode, selectedId: null }),
 
   toggleType: (type) =>
     set((s) => {

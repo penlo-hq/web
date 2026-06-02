@@ -75,7 +75,7 @@ export function GraphCanvas({ nodes, edges, hiddenTypes, searchQuery, selectedId
     return () => { sim.stop() }
   }, [visibleNodes, visibleEdges, size, layoutMode])
 
-  const focusId = hoverId ?? selectedId
+  const focusId = layoutMode === 'focus' ? selectedId : null
   const adjacency = useMemo(() => {
     const map = new Map<string, Set<string>>()
     for (const l of simLinksRef.current) {
