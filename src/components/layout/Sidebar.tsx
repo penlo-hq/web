@@ -26,6 +26,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/dispatch', label: 'Dispatch', sublabel: 'Approve agent work', adminOrLead: true },
   { to: '/outbox', label: 'Outbox', sublabel: 'Pending Slack messages', adminOrLead: true },
   { to: '/slack-settings', label: 'Slack', sublabel: 'Manage integration', adminOnly: true },
+  { to: '/admin/permissions', label: 'Permissions', sublabel: 'Roles & invites', adminOrLead: true },
   { to: '/linear-settings', label: 'Linear', sublabel: 'Manage integration', adminOnly: true },
   { to: '/admin/dashboard', label: 'Admin', sublabel: 'Dashboard', adminOnly: true },
   { to: '/admin/teams', label: 'Teams', sublabel: 'Manage members', adminOnly: true },

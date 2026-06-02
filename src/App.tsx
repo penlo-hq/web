@@ -20,6 +20,7 @@ import { ForgotPassword } from './views/ForgotPassword'
 import { ResetPassword } from './views/ResetPassword'
 import { CompanySignup } from './views/CompanySignup'
 import { TeamManagement } from './views/TeamManagement'
+import { TeamPermissions } from './views/TeamPermissions'
 import { AdminDashboard } from './views/AdminDashboard'
 import { LandingView } from './views/LandingView'
 import { PricingView } from './views/PricingView'
@@ -84,6 +85,7 @@ function PrivateLayout() {
             <Route path="/linear-settings" element={<RequireAdmin><LinearSettings /></RequireAdmin>} />
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
             <Route path="/admin/teams" element={<RequireAdmin><TeamManagement /></RequireAdmin>} />
+            <Route path="/admin/permissions" element={<RequireAdminOrLead><TeamPermissions /></RequireAdminOrLead>} />
             <Route path="*" element={<Navigate to="/brain/company" replace />} />
           </Routes>
         </AnimatePresence>

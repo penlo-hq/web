@@ -196,6 +196,27 @@ export const onboardingApi = {
     api.post('/api/v1/onboarding/brief', body).then((r) => r.data),
 }
 
+export type MemberRole = 'admin' | 'team_lead' | 'employee'
+
+export type PendingInvitationDTO = {
+  id: string
+  email: string
+  role: string
+  created_at: string
+  expires_at: string
+}
+
+export const teamPermissionsApi = {
+  listMembers: (): Promise<AdminUserDTO[]> =>
+    api.get('/api/v1/onboarding/users').then((r) => r.data),
+  listInvitations: (): Promise<PendingInvitationDTO[]> =>
+    api.get('/api/v1/auth/invitations').then((r) => r.data),
+  updateRole: (userId: string, role: MemberRole): Promise<{ id: string; role: string }> =>
+    api.patch(`/api/v1/onboarding/users/${userId}/role`, { role }).then((r) => r.data),
+  revokeInvitation: (inviteId: string): Promise<void> =>
+    api.delete(`/api/v1/auth/invitations/${inviteId}`).then(() => undefined),
+}
+
 export type TeamDTO = {
   id: string
   name: string
