@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { authApi, type InviteInfoDTO } from '../lib/api/endpoints'
 import { useAuthStore } from '../store/authStore'
+import { AuthLayout, AuthFooterLink, Button, Input, Spinner } from '../components/ui'
 
 type Status = 'loading' | 'invalid' | 'valid' | 'submitting'
 
@@ -75,73 +76,36 @@ export function InviteAccept() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-full max-w-sm px-8">
-        <div className="mb-8 animate-reveal">
-          <div className="text-[9.5px] uppercase tracking-[0.22em] text-stone mb-2">Penlo</div>
-          <h1 className="font-display font-bold text-[28px] tracking-tightest text-ink leading-none">
-            Enterprise Brain
-          </h1>
+    <AuthLayout title="Enterprise Brain">
+      {status === 'loading' && (
+        <div className="flex justify-center py-8">
+          <Spinner />
         </div>
+      )}
 
-        {status === 'loading' && <p className="text-[13px] text-stone">Checking your invite…</p>}
+      {status === 'invalid' && (
+        <div className="space-y-4 animate-reveal">
+          <p className="text-body text-text-primary leading-relaxed">
+            This invite is no longer valid. It may have expired or already been used.
+          </p>
+          <AuthFooterLink to="/login">Back to sign in</AuthFooterLink>
+        </div>
+      )}
 
-        {status === 'invalid' && (
-          <div className="space-y-4 animate-reveal">
-            <p className="text-[14px] text-ink leading-relaxed">
-              This invite is no longer valid. It may have expired or already been used.
-            </p>
-            <Link to="/login" className="inline-block text-[12px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors">
-              Back to sign in
-            </Link>
+      {(status === 'valid' || status === 'submitting') && info && (
+        <form onSubmit={handleSubmit} className="space-y-4 animate-reveal">
+          <div className="pb-3 border-b border-text-secondary/15">
+            <p className="text-body font-medium text-text-primary">Join {info.company_name}</p>
+            {info.team_name && <p className="text-caption text-text-secondary mt-1">Team: {info.team_name}</p>}
           </div>
-        )}
-
-        {(status === 'valid' || status === 'submitting') && info && (
-          <form onSubmit={handleSubmit} className="space-y-4 animate-reveal" style={{ animationDelay: '0.05s' }}>
-            <div className="pb-3 border-b border-mist">
-              <p className="text-[14px] text-ink font-medium">Join {info.company_name}</p>
-              {info.team_name && (
-                <p className="text-[12px] text-stone mt-1">Team: {info.team_name}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-[10.5px] uppercase tracking-[0.16em] text-stone block mb-1">Your name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={120}
-                required
-                className="w-full px-4 py-2.5 border border-mist rounded-xl text-[14px] text-ink placeholder-stone focus:outline-none focus:border-graphite transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="text-[10.5px] uppercase tracking-[0.16em] text-stone block mb-1">Password (min 12 chars)</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={12}
-                required
-                className="w-full px-4 py-2.5 border border-mist rounded-xl text-[14px] text-ink placeholder-stone focus:outline-none focus:border-graphite transition-colors"
-              />
-            </div>
-
-            {submitError && <p className="text-[12px] text-ink">{submitError}</p>}
-
-            <button
-              type="submit"
-              disabled={status === 'submitting'}
-              className="w-full py-2.5 bg-ink text-white rounded-xl text-[14px] font-medium hover:bg-graphite transition-colors disabled:opacity-50"
-            >
-              {status === 'submitting' ? 'Creating your account…' : 'Create account'}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+          <Input label="Your name" type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={120} required />
+          <Input label="Password (min 12 chars)" type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={12} required />
+          {submitError && <p className="text-caption-sm text-destructive bg-destructive-tint px-3 py-2 rounded-card">{submitError}</p>}
+          <Button type="submit" variant="primary" size="lg" disabled={status === 'submitting'} className="w-full">
+            {status === 'submitting' ? 'Creating your account…' : 'Create account'}
+          </Button>
+        </form>
+      )}
+    </AuthLayout>
   )
 }

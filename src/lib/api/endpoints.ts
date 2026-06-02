@@ -359,3 +359,34 @@ export const linearApi = {
   disconnect: (): Promise<{ status: string }> =>
     api.delete('/api/v1/linear/disconnect').then((r) => r.data),
 }
+
+export type NotificationDTO = import('../../types/notification').NotificationDTO
+export type NotificationPreferenceDTO = import('../../types/notification').NotificationPreferenceDTO
+
+export const notificationsApi = {
+  list: (params: { unread_only?: boolean; limit?: number; before?: string } = {}): Promise<NotificationDTO[]> =>
+    api.get('/api/v1/notifications', { params }).then((r) => r.data),
+  count: (): Promise<{ count: number }> =>
+    api.get('/api/v1/notifications/count').then((r) => r.data),
+  markRead: (id: string): Promise<NotificationDTO> =>
+    api.post(`/api/v1/notifications/${id}/read`).then((r) => r.data),
+  markAllRead: (): Promise<{ updated: number }> =>
+    api.post('/api/v1/notifications/read-all').then((r) => r.data),
+  getPreferences: (): Promise<NotificationPreferenceDTO[]> =>
+    api.get('/api/v1/notifications/preferences').then((r) => r.data),
+  patchPreference: (body: {
+    category: string
+    channel: string
+    enabled: boolean
+    quiet_hours_start?: string | null
+    quiet_hours_end?: string | null
+    timezone?: string | null
+  }): Promise<NotificationPreferenceDTO> =>
+    api.patch('/api/v1/notifications/preferences', body).then((r) => r.data),
+  registerDevice: (platform: 'web' | 'ios', token: string): Promise<{ id: string; registered: boolean }> =>
+    api.post('/api/v1/notifications/devices', { platform, token }).then((r) => r.data),
+  unregisterDevice: (id: string): Promise<{ deleted: boolean }> =>
+    api.delete(`/api/v1/notifications/devices/${id}`).then((r) => r.data),
+  vapidPublicKey: (): Promise<{ public_key: string }> =>
+    api.get('/api/v1/notifications/vapid-public-key').then((r) => r.data),
+}

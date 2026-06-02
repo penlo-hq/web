@@ -1,7 +1,9 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Sidebar } from './components/layout/Sidebar'
+import { Spinner } from './components/ui'
+import { NotificationProvider } from './components/notifications/NotificationProvider'
 import { BrainQuery } from './views/BrainQuery'
 import { CompanyBrain } from './views/CompanyBrain'
 import { ConnectApp } from './views/ConnectApp'
@@ -25,6 +27,7 @@ import { AdminDashboard } from './views/AdminDashboard'
 import { LandingView } from './views/LandingView'
 import { PricingView } from './views/PricingView'
 import { OnboardingView } from './views/OnboardingView'
+import { NotificationSettings } from './views/NotificationSettings'
 import { useAuthStore } from './store/authStore'
 import { wsClient } from './lib/ws/client'
 
@@ -47,13 +50,20 @@ function BootGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     bootstrap()
   }, [bootstrap])
-  if (!isLoaded) return null
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-canvas">
+        <Spinner size="lg" />
+      </div>
+    )
+  }
   return <>{children}</>
 }
 
 function PrivateLayout() {
   const user = useAuthStore((s) => s.user)
   const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     if (user?.company_id) {
@@ -62,35 +72,44 @@ function PrivateLayout() {
     return () => wsClient.disconnect()
   }, [user?.company_id])
 
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
+
   if (!user) return <Navigate to="/login" replace />
 
+  const menuProps = { onMenuClick: () => setMobileOpen(true) }
+
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar />
-      <main className="flex-1 min-w-0">
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/onboarding" element={<OnboardingView />} />
-            <Route path="/brain/ask" element={<BrainQuery />} />
-            <Route path="/brain/company" element={<CompanyBrain />} />
-            <Route path="/brain/me" element={<MyBrain />} />
-            <Route path="/timeline" element={<Timeline />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/drafts" element={<Drafts />} />
-            <Route path="/activity" element={<ActivityFeed />} />
-            <Route path="/connect" element={<ConnectApp />} />
-            <Route path="/outbox" element={<RequireAdminOrLead><Outbox /></RequireAdminOrLead>} />
-            <Route path="/dispatch" element={<RequireAdminOrLead><Dispatch /></RequireAdminOrLead>} />
-            <Route path="/slack-settings" element={<SlackSettings />} />
-            <Route path="/linear-settings" element={<RequireAdmin><LinearSettings /></RequireAdmin>} />
-            <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-            <Route path="/admin/teams" element={<RequireAdmin><TeamManagement /></RequireAdmin>} />
-            <Route path="/admin/permissions" element={<RequireAdminOrLead><TeamPermissions /></RequireAdminOrLead>} />
-            <Route path="*" element={<Navigate to="/brain/company" replace />} />
-          </Routes>
-        </AnimatePresence>
-      </main>
-    </div>
+    <NotificationProvider>
+      <div className="flex min-h-screen bg-canvas">
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+        <main className="flex-1 min-w-0">
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route path="/onboarding" element={<OnboardingView {...menuProps} />} />
+              <Route path="/brain/ask" element={<BrainQuery {...menuProps} />} />
+              <Route path="/brain/company" element={<CompanyBrain {...menuProps} />} />
+              <Route path="/brain/me" element={<MyBrain {...menuProps} />} />
+              <Route path="/timeline" element={<Timeline {...menuProps} />} />
+              <Route path="/tasks" element={<Tasks {...menuProps} />} />
+              <Route path="/drafts" element={<Drafts {...menuProps} />} />
+              <Route path="/activity" element={<ActivityFeed {...menuProps} />} />
+              <Route path="/connect" element={<ConnectApp {...menuProps} />} />
+              <Route path="/outbox" element={<RequireAdminOrLead><Outbox {...menuProps} /></RequireAdminOrLead>} />
+              <Route path="/dispatch" element={<RequireAdminOrLead><Dispatch {...menuProps} /></RequireAdminOrLead>} />
+              <Route path="/settings/notifications" element={<NotificationSettings {...menuProps} />} />
+              <Route path="/slack-settings" element={<SlackSettings {...menuProps} />} />
+              <Route path="/linear-settings" element={<RequireAdmin><LinearSettings {...menuProps} /></RequireAdmin>} />
+              <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard {...menuProps} /></RequireAdmin>} />
+              <Route path="/admin/teams" element={<RequireAdmin><TeamManagement {...menuProps} /></RequireAdmin>} />
+              <Route path="/admin/permissions" element={<RequireAdminOrLead><TeamPermissions {...menuProps} /></RequireAdminOrLead>} />
+              <Route path="*" element={<Navigate to="/brain/company" replace />} />
+            </Routes>
+          </AnimatePresence>
+        </main>
+      </div>
+    </NotificationProvider>
   )
 }
 

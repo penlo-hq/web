@@ -96,34 +96,34 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-accent/30 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-[440px] max-w-[92vw] bg-white rounded-2xl border border-mist shadow-lg px-6 py-5"
+        className="w-[440px] max-w-[92vw] bg-white rounded-2xl border border-text-secondary/10 shadow-lg px-6 py-5"
         onClick={(e) => e.stopPropagation()}
       >
         {invite === null ? (
           <>
-            <h2 className="font-display font-bold text-[18px] tracking-tightest text-ink mb-4">Invite a teammate</h2>
+            <h2 className="font-display font-bold text-[18px] tracking-tightest text-text-primary mb-4">Invite a teammate</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-[10.5px] uppercase tracking-[0.16em] text-stone block mb-1">Email</label>
+                <label className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary block mb-1">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="new@example.com"
-                  className="w-full px-3 py-2 rounded-xl border border-mist text-[13px] focus:outline-none focus:border-ink"
+                  className="w-full px-3 py-2 rounded-xl border border-text-secondary/10 text-[13px] focus:outline-none focus:border-ink"
                   autoFocus
                 />
               </div>
               <div>
-                <label className="text-[10.5px] uppercase tracking-[0.16em] text-stone block mb-1">Role</label>
+                <label className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary block mb-1">Role</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-mist text-[13px] bg-white focus:outline-none focus:border-ink"
+                  className="w-full px-3 py-2 rounded-xl border border-text-secondary/10 text-[13px] bg-white focus:outline-none focus:border-ink"
                 >
                   {ROLES.map((r) => (
                     <option key={r.value} value={r.value}>
@@ -133,17 +133,17 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
                 </select>
               </div>
               {teamName && (
-                <p className="text-[11.5px] text-stone">
-                  Team: <span className="text-ink font-medium">{teamName}</span>
+                <p className="text-[11.5px] text-text-secondary">
+                  Team: <span className="text-text-primary font-medium">{teamName}</span>
                 </p>
               )}
-              {error && <p className="text-[12px] text-ink">{error}</p>}
+              {error && <p className="text-[12px] text-text-primary">{error}</p>}
             </div>
             <div className="mt-5 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1.5 rounded-xl text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+                className="px-3 py-1.5 rounded-xl text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
               >
                 Cancel
               </button>
@@ -151,7 +151,7 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
                 type="button"
                 disabled={submitting}
                 onClick={submit}
-                className="px-4 py-1.5 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
+                className="px-4 py-1.5 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
               >
                 {submitting ? 'Sending…' : 'Send invite'}
               </button>
@@ -159,40 +159,40 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
           </>
         ) : (
           <>
-            <h2 className="font-display font-bold text-[18px] tracking-tightest text-ink mb-3">Invite ready</h2>
-            <p className="text-[12.5px] text-graphite mb-2">
-              Send this link to <span className="font-medium text-ink">{invite.email}</span>:
+            <h2 className="font-display font-bold text-[18px] tracking-tightest text-text-primary mb-3">Invite ready</h2>
+            <p className="text-[12.5px] text-text-secondary mb-2">
+              Send this link to <span className="font-medium text-text-primary">{invite.email}</span>:
             </p>
             <div className="flex items-center gap-2">
               <input
                 readOnly
                 value={invite.invite_url}
-                className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-mist text-[12px] text-ink bg-paper focus:outline-none"
+                className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-text-secondary/10 text-[12px] text-text-primary bg-surface focus:outline-none"
                 onFocus={(e) => e.currentTarget.select()}
               />
               <button
                 type="button"
                 onClick={copyLink}
-                className="px-3 py-2 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity"
+                className="px-3 py-2 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity"
               >
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-            <p className="mt-3 text-[11px] text-stone">
+            <p className="mt-3 text-[11px] text-text-secondary">
               Expires {new Date(invite.expires_at).toLocaleString()}.
             </p>
             <div className="mt-5 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={reset}
-                className="px-3 py-1.5 rounded-xl text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+                className="px-3 py-1.5 rounded-xl text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
               >
                 Invite another
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-1.5 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity"
+                className="px-4 py-1.5 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity"
               >
                 Done
               </button>

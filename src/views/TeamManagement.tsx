@@ -9,6 +9,7 @@ import {
   type TeamDTO,
   type TeamMemberDTO,
 } from '../lib/api/endpoints'
+import type { PageProps } from '../types/layout'
 
 type CreateState = { open: boolean; name: string; color: string; is_private: boolean; submitting: boolean; error: string | null }
 
@@ -38,7 +39,7 @@ function useTeams() {
   return { teams, loading, error, refresh, setTeams }
 }
 
-export function TeamManagement() {
+export function TeamManagement({ onMenuClick }: PageProps) {
   const { teams, loading, error, refresh } = useTeams()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [createState, setCreateState] = useState<CreateState>({
@@ -80,40 +81,40 @@ export function TeamManagement() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen">
-      <TopBar title="Teams" subtitle="Manage members" />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
+      <TopBar onMenuClick={onMenuClick} title="Teams" subtitle="Manage members" />
       <div className="flex-1 overflow-hidden flex">
-        <aside className="w-[320px] shrink-0 border-r border-mist overflow-y-auto px-5 py-5">
+        <aside className="w-[320px] shrink-0 border-r border-text-secondary/10 overflow-y-auto px-5 py-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-[14px] tracking-tightest text-ink">All teams</h2>
+            <h2 className="font-display font-bold text-[14px] tracking-tightest text-text-primary">All teams</h2>
             <button
               type="button"
               onClick={() => setCreateState((s) => ({ ...s, open: !s.open }))}
-              className="text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+              className="text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
             >
               {createState.open ? 'Cancel' : '+ New team'}
             </button>
           </div>
 
           {createState.open && (
-            <div className="mb-4 p-3 rounded-xl border border-mist bg-paper space-y-2">
+            <div className="mb-4 p-3 rounded-xl border border-text-secondary/10 bg-surface space-y-2">
               <input
                 type="text"
                 value={createState.name}
                 onChange={(e) => setCreateState((s) => ({ ...s, name: e.target.value }))}
                 placeholder="Team name"
                 maxLength={80}
-                className="w-full px-3 py-1.5 rounded-xl border border-mist text-[12.5px] bg-white focus:outline-none focus:border-ink"
+                className="w-full px-3 py-1.5 rounded-xl border border-text-secondary/10 text-[12.5px] bg-white focus:outline-none focus:border-ink"
               />
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={createState.color}
                   onChange={(e) => setCreateState((s) => ({ ...s, color: e.target.value }))}
-                  className="w-9 h-9 rounded-lg border border-mist cursor-pointer"
+                  className="w-9 h-9 rounded-lg border border-text-secondary/10 cursor-pointer"
                   aria-label="Team color"
                 />
-                <label className="flex items-center gap-2 text-[11.5px] text-graphite cursor-pointer">
+                <label className="flex items-center gap-2 text-[11.5px] text-text-secondary cursor-pointer">
                   <input
                     type="checkbox"
                     checked={createState.is_private}
@@ -123,23 +124,23 @@ export function TeamManagement() {
                   Private
                 </label>
               </div>
-              {createState.error && <p className="text-[11.5px] text-ink">{createState.error}</p>}
+              {createState.error && <p className="text-[11.5px] text-text-primary">{createState.error}</p>}
               <button
                 type="button"
                 disabled={createState.submitting}
                 onClick={submitCreate}
-                className="w-full px-3 py-1.5 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
+                className="w-full px-3 py-1.5 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
               >
                 {createState.submitting ? 'Creating…' : 'Create team'}
               </button>
             </div>
           )}
 
-          {loading && <p className="text-[12.5px] text-stone">Loading…</p>}
-          {error && <p className="text-[12.5px] text-ink">{error}</p>}
+          {loading && <p className="text-[12.5px] text-text-secondary">Loading…</p>}
+          {error && <p className="text-[12.5px] text-text-primary">{error}</p>}
           {!loading && teams.length === 0 && !createState.open && (
             <div className="text-center py-6">
-              <p className="text-[12.5px] text-stone">No teams yet. Create one to organize your company.</p>
+              <p className="text-[12.5px] text-text-secondary">No teams yet. Create one to organize your company.</p>
             </div>
           )}
 
@@ -150,7 +151,7 @@ export function TeamManagement() {
                   type="button"
                   onClick={() => setSelectedId(t.id)}
                   className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl transition-colors ${
-                    selectedId === t.id ? 'bg-ink text-white' : 'text-ink hover:bg-paper'
+                    selectedId === t.id ? 'bg-accent text-white' : 'text-text-primary hover:bg-surface'
                   }`}
                 >
                   <span
@@ -160,11 +161,11 @@ export function TeamManagement() {
                   />
                   <span className="flex-1 min-w-0 truncate text-[13px] font-medium">{t.name}</span>
                   {t.is_private && (
-                    <span className={`text-[9px] uppercase tracking-[0.18em] ${selectedId === t.id ? 'text-white/60' : 'text-stone'}`}>
+                    <span className={`text-[9px] uppercase tracking-[0.18em] ${selectedId === t.id ? 'text-white/60' : 'text-text-secondary'}`}>
                       Private
                     </span>
                   )}
-                  <span className={`text-[11px] ${selectedId === t.id ? 'text-white/60' : 'text-stone'}`}>
+                  <span className={`text-[11px] ${selectedId === t.id ? 'text-white/60' : 'text-text-secondary'}`}>
                     {t.member_count}
                   </span>
                 </button>
@@ -173,11 +174,11 @@ export function TeamManagement() {
           </ul>
         </aside>
 
-        <section className="flex-1 min-w-0 overflow-y-auto px-8 py-6">
+        <section className="flex-1 min-w-0 overflow-y-auto px-5 py-6">
           {selected ? (
             <TeamDetail team={selected} onChanged={refresh} />
           ) : (
-            <div className="text-center text-[13px] text-stone py-12">Select a team to manage it.</div>
+            <div className="text-center text-[13px] text-text-secondary py-12">Select a team to manage it.</div>
           )}
         </section>
       </div>
@@ -301,33 +302,33 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
           className="w-4 h-4 rounded"
           style={{ backgroundColor: team.color }}
         />
-        <h2 className="font-display font-bold text-[20px] tracking-tightest text-ink">{team.name}</h2>
-        {team.is_private && <span className="text-[10px] uppercase tracking-[0.18em] text-stone">Private</span>}
+        <h2 className="font-display font-bold text-[20px] tracking-tightest text-text-primary">{team.name}</h2>
+        {team.is_private && <span className="text-[10px] uppercase tracking-[0.18em] text-text-secondary">Private</span>}
       </div>
 
       <section className="space-y-3">
         <div>
-          <label className="text-[10.5px] uppercase tracking-[0.16em] text-stone block mb-1">Name</label>
+          <label className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary block mb-1">Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={80}
-            className="w-full px-3 py-2 rounded-xl border border-mist text-[13px] focus:outline-none focus:border-ink"
+            className="w-full px-3 py-2 rounded-xl border border-text-secondary/10 text-[13px] focus:outline-none focus:border-ink"
           />
         </div>
         <div className="flex items-center gap-3">
           <div>
-            <label className="text-[10.5px] uppercase tracking-[0.16em] text-stone block mb-1">Color</label>
+            <label className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary block mb-1">Color</label>
             <input
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="w-9 h-9 rounded-lg border border-mist cursor-pointer"
+              className="w-9 h-9 rounded-lg border border-text-secondary/10 cursor-pointer"
               aria-label="Team color"
             />
           </div>
-          <label className="flex items-center gap-2 text-[12px] text-graphite cursor-pointer mt-5">
+          <label className="flex items-center gap-2 text-[12px] text-text-secondary cursor-pointer mt-5">
             <input
               type="checkbox"
               checked={isPrivate}
@@ -337,12 +338,12 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
             Private team
           </label>
         </div>
-        {formError && <p className="text-[12px] text-ink">{formError}</p>}
+        {formError && <p className="text-[12px] text-text-primary">{formError}</p>}
         <button
           type="button"
           disabled={saving}
           onClick={save}
-          className="px-4 py-1.5 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
+          className="px-4 py-1.5 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
         >
           {saving ? 'Saving…' : 'Save'}
         </button>
@@ -350,31 +351,31 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="font-display font-bold text-[14px] tracking-tightest text-ink">
+          <h3 className="font-display font-bold text-[14px] tracking-tightest text-text-primary">
             Members ({members.length})
           </h3>
           <button
             type="button"
             onClick={() => setInviteOpen(true)}
-            className="text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+            className="text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
           >
             Invite member
           </button>
         </div>
-        {membersLoading && <p className="text-[12.5px] text-stone">Loading…</p>}
-        {!membersLoading && members.length === 0 && <p className="text-[12.5px] text-stone">No members yet.</p>}
-        <ul className="divide-y divide-mist border border-mist rounded-xl bg-white">
+        {membersLoading && <p className="text-[12.5px] text-text-secondary">Loading…</p>}
+        {!membersLoading && members.length === 0 && <p className="text-[12.5px] text-text-secondary">No members yet.</p>}
+        <ul className="divide-y divide-mist border border-text-secondary/10 rounded-xl bg-white">
           {members.map((m) => (
             <li key={m.id} className="flex items-center justify-between px-4 py-2.5">
               <div className="min-w-0">
-                <p className="text-[13px] text-ink font-medium truncate">{m.name}</p>
-                <p className="text-[11.5px] text-stone truncate">{m.email}</p>
+                <p className="text-[13px] text-text-primary font-medium truncate">{m.name}</p>
+                <p className="text-[11.5px] text-text-secondary truncate">{m.email}</p>
               </div>
               <button
                 type="button"
                 onClick={() => removeMember(m.id)}
                 aria-label={`Remove ${m.name}`}
-                className="text-[14px] text-stone hover:text-ink transition-colors"
+                className="text-[14px] text-text-secondary hover:text-text-primary transition-colors"
               >
                 ×
               </button>
@@ -384,12 +385,12 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
       </section>
 
       <section className="space-y-2">
-        <h3 className="text-[10.5px] uppercase tracking-[0.16em] text-stone">Add existing user</h3>
+        <h3 className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary">Add existing user</h3>
         <div className="flex items-center gap-2">
           <select
             value={addUserId}
             onChange={(e) => setAddUserId(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-xl border border-mist text-[13px] bg-white focus:outline-none focus:border-ink"
+            className="flex-1 px-3 py-2 rounded-xl border border-text-secondary/10 text-[13px] bg-white focus:outline-none focus:border-ink"
           >
             <option value="">Select an unassigned user…</option>
             {unassigned.map((u) => (
@@ -402,22 +403,22 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
             type="button"
             disabled={!addUserId}
             onClick={addMember}
-            className="px-4 py-2 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
+            className="px-4 py-2 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
           >
             Add
           </button>
         </div>
-        {addError && <p className="text-[12px] text-ink">{addError}</p>}
+        {addError && <p className="text-[12px] text-text-primary">{addError}</p>}
       </section>
 
-      <section className="pt-4 border-t border-mist">
+      <section className="pt-4 border-t border-text-secondary/10">
         {confirmDelete ? (
           <div className="flex items-center gap-2">
-            <p className="text-[12.5px] text-graphite flex-1">Confirm delete? Members will be unassigned.</p>
+            <p className="text-[12.5px] text-text-secondary flex-1">Confirm delete? Members will be unassigned.</p>
             <button
               type="button"
               onClick={() => setConfirmDelete(false)}
-              className="px-3 py-1.5 rounded-xl text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+              className="px-3 py-1.5 rounded-xl text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
             >
               Cancel
             </button>
@@ -425,7 +426,7 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
               type="button"
               disabled={deleting}
               onClick={deleteTeam}
-              className="px-3 py-1.5 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
+              className="px-3 py-1.5 rounded-xl bg-accent text-white text-[11px] uppercase tracking-[0.16em] disabled:opacity-50 hover:opacity-90 transition-opacity"
             >
               {deleting ? 'Deleting…' : 'Yes, delete'}
             </button>
@@ -434,7 +435,7 @@ function TeamDetail({ team, onChanged }: { team: TeamDTO; onChanged: () => Promi
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}
-            className="text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+            className="text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
           >
             Delete team
           </button>

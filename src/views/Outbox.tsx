@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Send } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { broadcastsApi, type PendingBroadcastDTO } from '../lib/api/endpoints'
 import { useGraphStore } from '../store/graphStore'
 import { useOutboxStore } from '../store/outboxStore'
+import type { PageProps } from '../types/layout'
+import { Button, Card, CardSkeleton, EmptyState, Textarea } from '../components/ui'
 
 function relativeTime(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime()
@@ -27,7 +30,7 @@ function expiresLabel(iso: string): string {
   return `Expires in ${hr}h`
 }
 
-export function Outbox() {
+export function Outbox({ onMenuClick }: PageProps) {
   const [rows, setRows] = useState<PendingBroadcastDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,6 +39,8 @@ export function Outbox() {
   const setSelected = useGraphStore((s) => s.setSelected)
   const setPendingCount = useOutboxStore((s) => s.setPendingCount)
   const decrement = useOutboxStore((s) => s.decrement)
+  const pendingCount = useOutboxStore((s) => s.pendingCount)
+  const lastActedId = useOutboxStore((s) => s.lastActedId)
   const editsRef = useRef<Record<string, string>>({})
 
   const refresh = useCallback(async () => {
@@ -55,6 +60,16 @@ export function Outbox() {
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  useEffect(() => {
+    void refresh()
+  }, [pendingCount, refresh])
+
+  useEffect(() => {
+    if (lastActedId) {
+      setRows((prev) => prev.filter((r) => r.id !== lastActedId))
+    }
+  }, [lastActedId])
 
   function handleEdit(id: string, value: string) {
     editsRef.current[id] = value
@@ -105,30 +120,32 @@ export function Outbox() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen">
-      <TopBar title="Outbox" subtitle="Pending Slack messages" />
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        {loading && <p className="text-[13px] text-stone">Loading…</p>}
-        {!loading && error && <p className="text-[13px] text-red-600">{error}</p>}
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
+      <TopBar onMenuClick={onMenuClick} title="Outbox" subtitle="Pending Slack messages" />
+      <div className="flex-1 overflow-y-auto px-5 py-6">
+        {loading && (
+          <div className="space-y-3 max-w-2xl">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        )}
+        {!loading && error && <p className="text-caption text-destructive">{error}</p>}
         {!loading && !error && rows.length === 0 && (
-          <p className="text-[13px] text-stone">No pending messages.</p>
+          <EmptyState icon={Send} title="No pending messages" description="Slack broadcasts awaiting approval will appear here." />
         )}
         <div className="space-y-3 max-w-2xl">
           {rows.map((row) => {
             const disabled = busyId === row.id
             return (
-              <div
-                key={row.id}
-                className="px-4 py-3 rounded-xl border border-mist bg-white hover:border-graphite transition-colors"
-              >
+              <Card key={row.id} padding="md" className="bg-canvas space-y-2">
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <div className="flex items-baseline gap-2 min-w-0">
-                    <span className="text-[13px] font-medium text-ink truncate">
+                    <span className="text-[13px] font-medium text-text-primary truncate">
                       #{row.channel_name || 'channel'}
                     </span>
-                    <span className="text-[10.5px] text-stone">{relativeTime(row.created_at)}</span>
+                    <span className="text-[10.5px] text-text-secondary">{relativeTime(row.created_at)}</span>
                   </div>
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-stone whitespace-nowrap">
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-text-secondary whitespace-nowrap">
                     {expiresLabel(row.expires_at)}
                   </span>
                 </div>
@@ -140,7 +157,7 @@ export function Outbox() {
                         key={n.id}
                         type="button"
                         onClick={() => setSelected(n.id)}
-                        className="shrink-0 px-2 py-0.5 rounded-full bg-paper text-[10.5px] text-ink hover:bg-mist transition-colors"
+                        className="shrink-0 px-2 py-0.5 rounded-full bg-surface text-[10.5px] text-text-primary hover:bg-mist transition-colors"
                         title={n.type}
                       >
                         {n.label}
@@ -149,36 +166,26 @@ export function Outbox() {
                   </div>
                 )}
 
-                <textarea
+                <Textarea
                   value={row.message_text}
                   onChange={(e) => handleEdit(row.id, e.target.value)}
                   onBlur={() => handleBlur(row)}
-                  className="w-full min-h-[88px] resize-y rounded-lg border border-mist bg-white px-3 py-2 text-[12.5px] text-ink leading-relaxed focus:outline-none focus:border-graphite"
+                  className="min-h-[88px] text-caption"
                 />
 
                 {actionErrorId === row.id && (
-                  <p className="text-[11px] text-red-600 mt-1.5">Action failed. Try again.</p>
+                  <p className="text-caption-sm text-destructive">Action failed. Try again.</p>
                 )}
 
-                <div className="flex gap-2 mt-3">
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => handleApprove(row.id)}
-                    className="px-3 py-1.5 rounded-xl bg-ink text-white text-[11px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity disabled:opacity-40"
-                  >
+                <div className="flex gap-2">
+                  <Button variant="primary" size="sm" disabled={disabled} onClick={() => handleApprove(row.id)}>
                     Approve
-                  </button>
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => handleDiscard(row.id)}
-                    className="px-3 py-1.5 rounded-xl border border-mist text-graphite text-[11px] uppercase tracking-[0.16em] hover:border-graphite transition-colors disabled:opacity-40"
-                  >
+                  </Button>
+                  <Button variant="secondary" size="sm" disabled={disabled} onClick={() => handleDiscard(row.id)}>
                     Discard
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             )
           })}
         </div>

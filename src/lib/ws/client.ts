@@ -4,6 +4,8 @@ import { useAuthStore } from '../../store/authStore'
 import { useActivityStore } from '../../store/activityStore'
 import { useOutboxStore } from '../../store/outboxStore'
 import { useDispatchStore } from '../../store/dispatchStore'
+import { useNotificationStore } from '../../store/notificationStore'
+import { handleNotificationPayload } from '../notifications/orchestrator'
 import { api } from '../api/client'
 
 const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000'
@@ -17,6 +19,10 @@ class BrainWSClient {
   private intentionalClose = false
   private _buffer: WSMessage[] = []
   private _unsubHydration: (() => void) | null = null
+
+  private _setConnected(connected: boolean): void {
+    useNotificationStore.getState().setWsConnected(connected)
+  }
 
   connect(companyId: string): void {
     this.companyId = companyId
@@ -59,6 +65,7 @@ class BrainWSClient {
 
     this.ws.onopen = () => {
       this.reconnectDelay = 1000
+      this._setConnected(true)
     }
 
     this.ws.onmessage = (evt) => {
@@ -69,6 +76,7 @@ class BrainWSClient {
     }
 
     this.ws.onclose = () => {
+      this._setConnected(false)
       if (!this.intentionalClose) this._scheduleReconnect()
     }
 
@@ -121,13 +129,16 @@ class BrainWSClient {
           user_id: p.user_id,
           user_name: p.user_name,
         })
+        if (!window.location.pathname.startsWith('/activity')) {
+          useActivityStore.getState().incrementUnread()
+        }
         break
       }
       case 'broadcast_pending':
         useOutboxStore.getState().setPendingCount(msg.payload.count)
         break
       case 'broadcast_acted':
-        useOutboxStore.getState().decrement()
+        useOutboxStore.getState().removeById(msg.payload.id)
         break
       case 'dispatch_pending':
         useDispatchStore.getState().setPendingCount(msg.payload.count)
@@ -146,6 +157,9 @@ class BrainWSClient {
           phase: 'failed',
           error: msg.payload.error,
         })
+        break
+      case 'notification':
+        handleNotificationPayload(msg.payload)
         break
     }
   }

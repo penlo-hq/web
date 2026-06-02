@@ -32,14 +32,14 @@ export function ActivityCard({ event }: Props) {
   const when = relativeTime(event.processed_at)
 
   return (
-    <article className="px-4 py-3 rounded-xl border border-mist bg-white hover:border-graphite transition-colors">
+    <article className="px-4 py-3 rounded-xl border border-text-secondary/10 bg-white hover:border-accent/30 transition-colors">
       <div className="flex items-baseline gap-2 mb-1.5">
-        <span className="text-[12px] font-medium text-ink">{who}</span>
-        <span className="text-[10.5px] uppercase tracking-[0.16em] text-stone">{sourceLabel}</span>
-        <span className="text-[10.5px] text-stone ml-auto">{when}</span>
+        <span className="text-[12px] font-medium text-text-primary">{who}</span>
+        <span className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary">{sourceLabel}</span>
+        <span className="text-[10.5px] text-text-secondary ml-auto">{when}</span>
       </div>
       {event.summary && (
-        <p className="text-[12.5px] text-graphite leading-snug line-clamp-2 mb-2">{event.summary}</p>
+        <p className="text-[12.5px] text-text-secondary leading-snug line-clamp-2 mb-2">{event.summary}</p>
       )}
       {event.node_ids.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -47,7 +47,7 @@ export function ActivityCard({ event }: Props) {
             <NodeChip key={nid} nodeId={nid} />
           ))}
           {event.node_count > event.node_ids.length && (
-            <span className="text-[10.5px] text-stone self-center">
+            <span className="text-[10.5px] text-text-secondary self-center">
               +{event.node_count - event.node_ids.length} hidden
             </span>
           )}
