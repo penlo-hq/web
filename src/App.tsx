@@ -13,6 +13,7 @@ import { ActivityFeed } from './views/ActivityFeed'
 import { Outbox } from './views/Outbox'
 import { Dispatch } from './views/Dispatch'
 import { SlackSettings } from './views/SlackSettings'
+import { LinearSettings } from './views/LinearSettings'
 import { LoginView } from './views/LoginView'
 import { InviteAccept } from './views/InviteAccept'
 import { ForgotPassword } from './views/ForgotPassword'
@@ -80,6 +81,7 @@ function PrivateLayout() {
             <Route path="/outbox" element={<RequireAdminOrLead><Outbox /></RequireAdminOrLead>} />
             <Route path="/dispatch" element={<RequireAdminOrLead><Dispatch /></RequireAdminOrLead>} />
             <Route path="/slack-settings" element={<SlackSettings />} />
+            <Route path="/linear-settings" element={<RequireAdmin><LinearSettings /></RequireAdmin>} />
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
             <Route path="/admin/teams" element={<RequireAdmin><TeamManagement /></RequireAdmin>} />
             <Route path="*" element={<Navigate to="/brain/company" replace />} />

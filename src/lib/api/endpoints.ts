@@ -309,3 +309,25 @@ export const authApi = {
   resetPassword: (token: string, password: string): Promise<AuthTokenResponse> =>
     publicApi.post('/api/v1/auth/reset-password', { token, password }).then((r) => r.data),
 }
+
+export type LinearStatusDTO = {
+  connected: boolean
+  org_id: string | null
+  org_name: string | null
+  connected_at: string | null
+}
+
+export type LinearConnectResponse = {
+  org_id: string
+  org_name: string
+  connected: boolean
+}
+
+export const linearApi = {
+  status: (): Promise<LinearStatusDTO> =>
+    api.get('/api/v1/linear/status').then((r) => r.data),
+  connect: (apiToken: string, webhookSecret: string): Promise<LinearConnectResponse> =>
+    api.post('/api/v1/linear/connect', { api_token: apiToken, webhook_secret: webhookSecret }).then((r) => r.data),
+  disconnect: (): Promise<{ status: string }> =>
+    api.delete('/api/v1/linear/disconnect').then((r) => r.data),
+}
