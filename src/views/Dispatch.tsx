@@ -161,7 +161,7 @@ export function Dispatch() {
                   <div className="text-[13px] font-medium text-ink leading-snug mb-1">{card.feature_label}</div>
                   <div className="flex items-center gap-3 text-[12.5px] text-graphite">
                     <span>✓ PR opened</span>
-                    {prUrl && (
+                    {prUrl && /^https?:\/\//i.test(prUrl) && (
                       <a
                         href={prUrl}
                         target="_blank"
