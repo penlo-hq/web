@@ -117,23 +117,30 @@ export const broadcastsApi = {
     api.get('/api/v1/broadcasts/count').then((r) => r.data),
 }
 
+export type DispatchMode = 'auto' | 'mcp'
+
 export type DispatchCardDTO = {
   id: string
   feature_label: string
   feature_summary: string
   source: string | null
+  complexity: string | null
   status: string
+  mode: DispatchMode
+  pr_url: string | null
+  error: string | null
+  started_at: string | null
   created_at: string
   expires_at: string
 }
 
 export const dispatchApi = {
-  list: (): Promise<DispatchCardDTO[]> =>
-    api.get('/api/v1/dispatches').then((r) => r.data),
+  list: (status?: string): Promise<DispatchCardDTO[]> =>
+    api.get('/api/v1/dispatches', { params: status ? { status } : {} }).then((r) => r.data),
   count: (): Promise<{ count: number }> =>
     api.get('/api/v1/dispatches/count').then((r) => r.data),
-  approve: (id: string): Promise<DispatchCardDTO> =>
-    api.post(`/api/v1/dispatches/${id}/approve`).then((r) => r.data),
+  approve: (id: string, mode: DispatchMode = 'mcp'): Promise<DispatchCardDTO> =>
+    api.post(`/api/v1/dispatches/${id}/approve`, { mode }).then((r) => r.data),
   discard: (id: string): Promise<void> =>
     api.post(`/api/v1/dispatches/${id}/discard`).then(() => undefined),
 }

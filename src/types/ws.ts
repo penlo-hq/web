@@ -19,5 +19,8 @@ export type WSMessage =
   | { type: 'broadcast_pending'; payload: { count: number } }
   | { type: 'broadcast_acted'; payload: { id: string; action: 'approved' | 'discarded' } }
   | { type: 'dispatch_pending'; payload: { count: number } }
+  | { type: 'dispatch_building'; payload: { dispatch_id: string } }
+  | { type: 'dispatch_complete'; payload: { dispatch_id: string; pr_url: string } }
+  | { type: 'dispatch_failed'; payload: { dispatch_id: string; error: string } }
   | { type: 'ping' }
   | { type: 'pong' }

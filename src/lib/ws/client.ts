@@ -132,6 +132,21 @@ class BrainWSClient {
       case 'dispatch_pending':
         useDispatchStore.getState().setPendingCount(msg.payload.count)
         break
+      case 'dispatch_building':
+        useDispatchStore.getState().setBuildState(msg.payload.dispatch_id, { phase: 'building' })
+        break
+      case 'dispatch_complete':
+        useDispatchStore.getState().setBuildState(msg.payload.dispatch_id, {
+          phase: 'complete',
+          pr_url: msg.payload.pr_url,
+        })
+        break
+      case 'dispatch_failed':
+        useDispatchStore.getState().setBuildState(msg.payload.dispatch_id, {
+          phase: 'failed',
+          error: msg.payload.error,
+        })
+        break
     }
   }
 
