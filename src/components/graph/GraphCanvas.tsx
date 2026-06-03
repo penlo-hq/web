@@ -6,6 +6,7 @@ import {
 } from '../../lib/graph/simulation'
 import { computeDepthScore } from '../../lib/graph/depth'
 import { Graph3DCanvas } from './Graph3DCanvas'
+import { GraphLegend } from './GraphLegend'
 import type { LayoutMode } from '../../store/graphStore'
 
 type Props = {
@@ -17,9 +18,20 @@ type Props = {
   onSelect: (id: string | null) => void
   teamColors?: Map<string, string>
   layoutMode?: LayoutMode
+  /** When set, nodes outside this set are dimmed (e.g. highlight nodes added in a timeline push). */
+  accentNodeIds?: Set<string>
 }
 
-export function GraphCanvas({ nodes, edges, hiddenTypes, searchQuery, selectedId, onSelect, layoutMode = 'free' }: Props) {
+export function GraphCanvas({
+  nodes,
+  edges,
+  hiddenTypes,
+  searchQuery,
+  selectedId,
+  onSelect,
+  layoutMode = 'free',
+  accentNodeIds,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 900, h: 700 })
   const simNodesRef = useRef<SimNode[]>([])
@@ -106,15 +118,52 @@ export function GraphCanvas({ nodes, edges, hiddenTypes, searchQuery, selectedId
     return set
   }, [focusId, adjacency, layoutMode])
 
-  const searchFocusedIds = useMemo<Set<string> | null>(() => {
-    if (!searchMatched) return focusedIds
-    if (!focusedIds) return searchMatched
-    return new Set([...focusedIds].filter((id) => searchMatched.has(id)))
-  }, [focusedIds, searchMatched])
+  const selectionContextIds = useMemo<Set<string> | null>(() => {
+    if (!selectedId) return null
+    const set = new Set<string>([selectedId])
+    const oneHop = adjacency.get(selectedId)
+    if (oneHop) for (const id of oneHop) set.add(id)
+    return set
+  }, [selectedId, adjacency])
+
+  const renderFocusedIds = useMemo<Set<string> | null>(() => {
+    if (accentNodeIds && accentNodeIds.size > 0) {
+      const bright = new Set(accentNodeIds)
+      if (selectedId) {
+        bright.add(selectedId)
+        const oneHop = adjacency.get(selectedId)
+        if (oneHop) for (const id of oneHop) bright.add(id)
+      }
+      return bright
+    }
+    if (searchMatched) {
+      const set = new Set(searchMatched)
+      if (selectionContextIds) for (const id of selectionContextIds) set.add(id)
+      return set
+    }
+    if (selectionContextIds) return selectionContextIds
+    return focusedIds
+  }, [accentNodeIds, searchMatched, selectionContextIds, focusedIds, selectedId, adjacency])
+
+  const prevSelectedRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (prevSelectedRef.current === selectedId) return
+    prevSelectedRef.current = selectedId
+    if (!selectedId || typeof window === 'undefined') return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduced) return
+    const sim = simRef.current
+    if (sim) sim.alpha(0.28).restart()
+  }, [selectedId])
 
   const handleHover = useCallback((id: string | null) => setHoverId(id), [])
 
   const isEmpty = visibleNodes.length === 0
+
+  const selectedLabel = useMemo(() => {
+    if (!selectedId) return null
+    return visibleNodes.find((n) => n.id === selectedId)?.label ?? null
+  }, [selectedId, visibleNodes])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const renderedNodes = useMemo(() => [...simNodesRef.current], [tickCount])
@@ -127,7 +176,7 @@ export function GraphCanvas({ nodes, edges, hiddenTypes, searchQuery, selectedId
       <Graph3DCanvas
         nodes={renderedNodes}
         links={renderedLinks}
-        focusedIds={searchFocusedIds}
+        focusedIds={renderFocusedIds}
         hoverId={hoverId}
         selectedId={selectedId}
         width={size.w}
@@ -136,10 +185,12 @@ export function GraphCanvas({ nodes, edges, hiddenTypes, searchQuery, selectedId
         onSelect={onSelect}
         layoutMode={layoutMode}
       />
-      <div className="absolute bottom-4 left-4 pointer-events-none">
-        <span style={{ fontSize: 9.5, letterSpacing: '0.2em', color: '#9a9a9a', fontFamily: 'ui-monospace, "JetBrains Mono", monospace' }}>
-          {visibleNodes.length} NODES · {visibleEdges.length} EDGES
-        </span>
+      <div className="absolute bottom-4 left-4 z-10">
+        <GraphLegend
+          nodeCount={visibleNodes.length}
+          edgeCount={visibleEdges.length}
+          selectedLabel={selectedLabel}
+        />
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
+import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Button } from './Button'
 
 type Props = {
   icon: LucideIcon
@@ -7,21 +7,28 @@ type Props = {
   description?: string
   actionLabel?: string
   onAction?: () => void
+  children?: ReactNode
 }
 
-export function EmptyState({ icon: Icon, title, description, actionLabel, onAction }: Props) {
+export function EmptyState({ icon: Icon, title, description, actionLabel, onAction, children }: Props) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-5 text-center">
-      <Icon className="w-11 h-11 text-text-secondary/35 mb-4" strokeWidth={1.25} />
-      <h3 className="text-body font-semibold text-text-primary mb-1">{title}</h3>
+    <div className="flex flex-col items-center justify-center py-16 px-5 text-center animate-fade-in">
+      <div className="w-12 h-12 rounded-2xl bg-black/[0.04] flex items-center justify-center mb-4">
+        <Icon className="w-6 h-6 text-text-tertiary" strokeWidth={1.5} />
+      </div>
+      <h3 className="font-semibold text-[15px] text-text-primary mb-1.5 tracking-[-0.01em]">{title}</h3>
       {description && (
-        <p className="text-caption text-text-secondary max-w-sm mb-4">{description}</p>
+        <p className="text-[13px] text-text-secondary max-w-[280px] leading-relaxed">{description}</p>
       )}
       {actionLabel && onAction && (
-        <Button variant="primary" size="sm" onClick={onAction}>
+        <button
+          onClick={onAction}
+          className="mt-4 px-4 py-2 rounded-xl bg-accent text-white text-[13px] font-medium hover:bg-accent/90 transition-colors"
+        >
           {actionLabel}
-        </Button>
+        </button>
       )}
+      {children}
     </div>
   )
 }

@@ -19,6 +19,7 @@ const Z_SCALE: Record<string, number> = {
   agent: 190,
   feature: 230,
   decision: 230,
+  architecture: 220,
   alert: 200,
 }
 
@@ -57,8 +58,16 @@ type Props = {
 }
 
 export function Graph3DCanvas({
-  nodes, links, focusedIds, hoverId, selectedId,
-  width, height, onHover, onSelect, layoutMode = 'free',
+  nodes,
+  links,
+  focusedIds,
+  hoverId,
+  selectedId,
+  width,
+  height,
+  onHover,
+  onSelect,
+  layoutMode = 'free',
 }: Props) {
   const nodeZ = useMemo(() => {
     const m = new Map<string, number>()
@@ -70,7 +79,10 @@ export function Graph3DCanvas({
 
   const focusCentroid = useMemo(() => {
     if (layoutMode !== 'focus' || !selectedId || !focusedIds) return null
-    let cx = 0, cy = 0, cz = 0, count = 0
+    let cx = 0,
+      cy = 0,
+      cz = 0,
+      count = 0
     for (const n of nodes) {
       if (!focusedIds.has(n.id) || n.x == null || n.y == null) continue
       cx += n.x - width / 2
@@ -84,13 +96,18 @@ export function Graph3DCanvas({
 
   const focusFraming = useMemo(() => {
     if (layoutMode !== 'focus' || !selectedId || !focusedIds) return null
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity
     for (const n of nodes) {
       if (!focusedIds.has(n.id) || n.x == null || n.y == null) continue
       const x = n.x - width / 2
       const y = -(n.y - height / 2)
-      minX = Math.min(minX, x); maxX = Math.max(maxX, x)
-      minY = Math.min(minY, y); maxY = Math.max(maxY, y)
+      minX = Math.min(minX, x)
+      maxX = Math.max(maxX, x)
+      minY = Math.min(minY, y)
+      maxY = Math.max(maxY, y)
     }
     if (minX === Infinity) return null
     const rx = (maxX - minX) / 2 + 60
@@ -99,6 +116,17 @@ export function Graph3DCanvas({
     const fovRad = (55 * Math.PI) / 180
     return Math.max(200, Math.min(1400, (radius / Math.tan(fovRad / 2)) * 1.2))
   }, [layoutMode, selectedId, focusedIds, nodes, width, height])
+
+  const selectedWorldPos = useMemo(() => {
+    if (!selectedId) return null
+    const n = nodes.find((node) => node.id === selectedId)
+    if (!n || n.x == null || n.y == null) return null
+    return new THREE.Vector3(
+      n.x - width / 2,
+      -(n.y - height / 2),
+      nodeZ.get(n.id) ?? 0,
+    )
+  }, [selectedId, nodes, nodeZ, width, height])
 
   const clusterHalos = useMemo(() => {
     if (layoutMode !== 'cluster') return []
@@ -119,6 +147,10 @@ export function Graph3DCanvas({
     }))
   }, [layoutMode, nodes, width, height])
 
+  const cameraTarget = layoutMode === 'focus' && focusCentroid ? focusCentroid : selectedWorldPos
+  const cameraDistance =
+    layoutMode === 'focus' && focusFraming != null ? focusFraming : selectedWorldPos ? 420 : 700
+
   return (
     <Canvas
       camera={{ position: [0, 0, 700], fov: 55 }}
@@ -129,27 +161,28 @@ export function Graph3DCanvas({
       <pointLight position={[280, 280, 380]} intensity={0.7} />
       <pointLight position={[-180, -140, -240]} intensity={0.18} />
 
-      <FocusCameraTarget target={focusCentroid} distance={focusFraming ?? 700} />
+      <SelectionCameraController target={cameraTarget} distance={cameraDistance} />
 
       {clusterHalos.map((h) => (
         <mesh key={h.teamId} position={[h.cx, h.cy, -10]}>
           <ringGeometry args={[h.r - 1, h.r + 1, 64]} />
-          <meshBasicMaterial color="#9a9a9a" transparent opacity={0.18} side={THREE.DoubleSide} />
+          <meshBasicMaterial color="#9a9a9a" transparent opacity={0.1} side={THREE.DoubleSide} />
         </mesh>
       ))}
 
       {links.map((l, i) => {
         const s = l.source as SimNode
         const t = l.target as SimNode
-        const isFocusEdge = focusedIds
-          ? focusedIds.has(s.id) && focusedIds.has(t.id)
-          : true
+        const isFocusEdge = focusedIds ? focusedIds.has(s.id) && focusedIds.has(t.id) : true
+        const touchesSelected =
+          Boolean(selectedId) && (s.id === selectedId || t.id === selectedId)
         return (
           <Edge3D
             key={l.id ?? i}
             link={l}
             nodeZ={nodeZ}
             focused={isFocusEdge}
+            touchesSelected={touchesSelected}
             width={width}
             height={height}
           />
@@ -158,7 +191,7 @@ export function Graph3DCanvas({
 
       {nodes.map((node) => {
         if (node.x == null || node.y == null) return null
-        const isFocused = hoverId === node.id
+        const isHovered = hoverId === node.id
         const isSelected = selectedId === node.id
         const isDimmed = focusedIds != null && !focusedIds.has(node.id)
         const x = node.x - width / 2
@@ -170,10 +203,11 @@ export function Graph3DCanvas({
             id={node.id}
             type={node.type}
             label={node.label}
+            importance={node.importance ?? 0.5}
             x={x}
             y={y}
             z={z}
-            isFocused={isFocused}
+            isHovered={isHovered}
             isSelected={isSelected}
             isDimmed={isDimmed}
             isStale={node.is_stale}
@@ -187,15 +221,21 @@ export function Graph3DCanvas({
   )
 }
 
-function FocusCameraTarget({ target, distance }: { target: THREE.Vector3 | null; distance: number }) {
+function SelectionCameraController({
+  target,
+  distance,
+}: {
+  target: THREE.Vector3 | null
+  distance: number
+}) {
   const { camera, controls } = useThree() as unknown as {
     camera: THREE.Camera
     controls: { target: THREE.Vector3; update: () => void } | undefined
   }
   const reducedMotion = usePrefersReducedMotion()
-  const targetRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0))
+  const targetRef = useRef(new THREE.Vector3(0, 0, 0))
   const desiredRef = useRef<THREE.Vector3 | null>(null)
-  const desiredCamRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 700))
+  const desiredCamRef = useRef(new THREE.Vector3(0, 0, 700))
 
   useEffect(() => {
     desiredRef.current = target
@@ -225,9 +265,9 @@ function FocusCameraTarget({ target, distance }: { target: THREE.Vector3 | null;
   return (
     <OrbitControls
       makeDefault
-      enablePan={true}
-      enableZoom={true}
-      enableRotate={true}
+      enablePan
+      enableZoom
+      enableRotate
       minDistance={80}
       maxDistance={2000}
       rotateSpeed={0.6}

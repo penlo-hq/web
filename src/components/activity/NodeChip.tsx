@@ -30,7 +30,7 @@ export function NodeChip({ nodeId }: Props) {
       onClick={onClick}
       className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-text-secondary/10 hover:border-accent/30 transition-colors text-[10.5px] text-text-primary"
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-graphite" />
+      <span className="w-1.5 h-1.5 rounded-full bg-text-secondary" />
       <span className="font-medium">{node.label}</span>
       <span className="text-text-secondary">{label}</span>
     </button>

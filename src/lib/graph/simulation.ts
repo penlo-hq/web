@@ -10,24 +10,12 @@ import {
   type SimulationNodeDatum,
 } from 'd3-force'
 import type { GraphEdge, GraphNode, NodeType } from '../../types/graph'
+import { BASE_NODE_RADIUS, collideRadius, NODE_RADIUS } from './nodeVisuals'
 
 export type SimNode = GraphNode & SimulationNodeDatum & { _isNew?: boolean }
 export type SimLink = SimulationLinkDatum<SimNode> & { id: string; kind: string; weight: number }
 
-export const NODE_RADIUS: Record<NodeType, number> = {
-  company: 36,
-  team: 28,
-  person: 16,
-  client: 14,
-  topic: 13,
-  task: 11,
-  event: 11,
-  draft: 10,
-  agent: 13,
-  feature: 12,
-  decision: 10,
-  alert: 14,
-}
+export { NODE_RADIUS, BASE_NODE_RADIUS, collideRadius }
 
 const LINK_DISTANCE: Record<NodeType, number> = {
   company: 0,
@@ -41,6 +29,7 @@ const LINK_DISTANCE: Record<NodeType, number> = {
   agent: 90,
   feature: 85,
   decision: 70,
+  architecture: 80,
   alert: 90,
 }
 
@@ -56,6 +45,7 @@ const CHARGE_STRENGTH: Record<NodeType, number> = {
   agent: -220,
   feature: -210,
   decision: -190,
+  architecture: -200,
   alert: -240,
 }
 
@@ -96,7 +86,7 @@ export function buildSimulation(
         .strength(0.5),
     )
     .force('charge', forceManyBody<SimNode>().strength((d) => CHARGE_STRENGTH[d.type] ?? -250))
-    .force('collide', forceCollide<SimNode>().radius((d) => NODE_RADIUS[d.type] + 18).strength(0.9))
+    .force('collide', forceCollide<SimNode>().radius((d) => collideRadius(d) + 18).strength(0.9))
     .force('bounds', boundsForce)
     .alpha(0.9)
     .alphaDecay(0.032)

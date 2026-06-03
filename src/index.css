@@ -4,37 +4,96 @@
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
+
   html {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
+
   body {
     background: #ffffff;
     color: #171717;
     margin: 0;
   }
+
+  /* Apple-quality transition baseline on all interactive elements */
+  a, button, [role="button"] {
+    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease,
+                border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  /* Apple headline letter-spacing */
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+  }
+
+  h4, h5, h6 {
+    letter-spacing: -0.01em;
+  }
+
   ::selection {
     background: #0053D6;
     color: #ffffff;
   }
+
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(23, 23, 23, 0.12); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #6E6E73; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(23, 23, 23, 0.24); }
 }
 
 @layer components {
   .hairline-border {
     border: 0.5px solid rgba(23, 23, 23, 0.08);
   }
+
   .frosted-pill {
     @apply backdrop-blur-xl bg-white/70 border border-black/[0.06];
   }
+
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-1;
+  }
+
+  /* Consistent page content container */
+  .page-gutter {
+    @apply px-5 max-w-2xl;
+  }
+
+  /* Apple-style form input */
+  .input-field {
+    @apply w-full px-3.5 py-3 rounded-xl border border-black/[0.10]
+           bg-white text-body text-text-primary placeholder:text-text-tertiary
+           focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/40
+           transition-shadow;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(23, 23, 23, 0.04) 25%,
+      rgba(23, 23, 23, 0.08) 50%,
+      rgba(23, 23, 23, 0.04) 75%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-lg;
+  }
+
+  /* Section divider with label */
+  .section-divider {
+    @apply flex items-center gap-2 py-1 px-3;
+  }
+
+  .section-divider-label {
+    @apply text-caption-sm font-semibold tracking-section text-text-tertiary uppercase;
   }
 }
 
 @layer utilities {
   .animate-reveal { animation: reveal 0.4s ease both; }
+  .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-fade-in { animation: fadeIn 0.2s ease both; }
 }

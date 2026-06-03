@@ -155,7 +155,7 @@ export function OnboardingBriefModal({ isOpen, onClose, onGenerated }: Props) {
             </div>
 
             <p className="text-[11px] text-text-secondary">
-              The brief will be saved as a draft assigned to them. They'll see it in their Drafts.
+              The brief is saved as a private draft. Manage it under Admin → Drafts.
             </p>
 
             {error && <p className="text-[12px] text-text-primary">{error}</p>}

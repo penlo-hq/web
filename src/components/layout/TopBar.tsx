@@ -7,47 +7,53 @@ type Props = {
   title: string
   subtitle?: string
   onMenuClick?: () => void
+  actions?: React.ReactNode
+  /** When true, show timeline replay date instead of subtitle if timelineAt is set. */
+  useTimelineEyebrow?: boolean
 }
 
-export function TopBar({ title, subtitle, onMenuClick }: Props) {
+export function TopBar({ title, subtitle, onMenuClick, actions, useTimelineEyebrow = false }: Props) {
   const timelineAt = useGraphStore((s) => s.timelineAt)
   const unreadCount = useNotificationStore((s) => s.unreadCount)
   const wsConnected = useNotificationStore((s) => s.wsConnected)
   const togglePanel = useNotificationStore((s) => s.togglePanel)
 
-  const eyebrow = timelineAt
-    ? `Viewing ${new Date(timelineAt).toLocaleDateString()}`
-    : subtitle ?? 'Live'
+  const eyebrow =
+    useTimelineEyebrow && timelineAt
+      ? `Viewing ${new Date(timelineAt).toLocaleDateString()}`
+      : subtitle ?? null
 
   return (
-    <div className="px-5 py-4 flex items-center gap-3 border-b border-text-secondary/10">
+    <div className="px-5 py-3.5 flex items-center gap-3 border-b border-black/[0.06] bg-canvas/80 backdrop-blur-sm sticky top-0 z-10">
       {onMenuClick && <MobileMenuButton onClick={onMenuClick} />}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 text-caption-sm uppercase tracking-section text-text-secondary mb-0.5">
-          <span>{eyebrow}</span>
-          <span
-            className={`inline-block w-1.5 h-1.5 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-text-secondary/40'}`}
-            title={wsConnected ? 'Connected' : 'Reconnecting…'}
-          />
-        </div>
-        <h1 className="font-display font-semibold text-[22px] text-text-primary leading-tight truncate">
+        {eyebrow && (
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-[10px] font-semibold tracking-[0.10em] text-text-tertiary uppercase">
+              {eyebrow}
+            </span>
+            <span
+              className={`inline-block w-1.5 h-1.5 rounded-full ${wsConnected ? 'bg-success' : 'bg-text-tertiary'}`}
+              title={wsConnected ? 'Connected' : 'Reconnecting…'}
+            />
+          </div>
+        )}
+        <h1 className="font-semibold text-[20px] text-text-primary leading-tight tracking-[-0.02em] truncate">
           {title}
         </h1>
       </div>
+      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       <button
         type="button"
-        className="relative p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-black/[0.04] transition-colors shrink-0"
+        className="relative w-9 h-9 flex items-center justify-center rounded-xl text-text-secondary hover:text-text-primary hover:bg-black/[0.04] focus-ring shrink-0"
         aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
         onClick={togglePanel}
       >
-        <Bell size={20} />
+        <Bell size={18} strokeWidth={1.75} />
         {unreadCount > 0 && (
-          <>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
-            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-white text-[10px] font-semibold flex items-center justify-center">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
-          </>
+          <span className="absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-1 rounded-full bg-accent text-white text-[9px] font-bold flex items-center justify-center leading-none">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
         )}
       </button>
     </div>

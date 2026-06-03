@@ -160,7 +160,7 @@ export function Outbox({ onMenuClick }: PageProps) {
                         key={n.id}
                         type="button"
                         onClick={() => setSelected(n.id)}
-                        className="shrink-0 px-2 py-0.5 rounded-full bg-surface text-[10.5px] text-text-primary hover:bg-mist transition-colors"
+                        className="shrink-0 px-2 py-0.5 rounded-full bg-black/[0.05] text-[10.5px] text-text-primary hover:bg-black/[0.09] transition-colors"
                         title={n.type}
                       >
                         {n.label}

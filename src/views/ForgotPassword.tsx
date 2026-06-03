@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { CheckCircle2, Loader2, Mail } from 'lucide-react'
 import { authApi } from '../lib/api/endpoints'
-import { AuthLayout, AuthFooterLink, Button, Input } from '../components/ui'
+import { AuthLayout, AuthFooterLink } from '../components/ui'
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -13,36 +14,67 @@ export function ForgotPassword() {
     try {
       await authApi.forgotPassword(email.trim())
     } catch {
-      /* swallow */
+      /* swallow — always show success for anti-enumeration */
     } finally {
       setSubmitted(true)
       setLoading(false)
     }
   }
 
+  if (submitted) {
+    return (
+      <AuthLayout
+        title="Check your inbox"
+        footer={<AuthFooterLink to="/login">Back to sign in</AuthFooterLink>}
+      >
+        <div className="flex flex-col items-center text-center gap-3 py-2">
+          <div className="w-12 h-12 rounded-full bg-success-tint flex items-center justify-center">
+            <CheckCircle2 className="w-6 h-6 text-success" />
+          </div>
+          <p className="text-[14px] text-text-secondary leading-relaxed">
+            If <span className="text-text-primary font-medium">{email}</span> has a Penlo account,
+            a password reset link is on its way. The link expires in 30 minutes.
+          </p>
+        </div>
+      </AuthLayout>
+    )
+  }
+
   return (
     <AuthLayout
-      title="Reset your password"
-      subtitle="Enter your email and we'll send you a link to choose a new password."
+      title="Reset password"
+      subtitle="Enter your email and we'll send you a link to choose a new one."
+      footer={<AuthFooterLink to="/login">Back to sign in</AuthFooterLink>}
     >
-      {submitted ? (
-        <div className="space-y-4 animate-reveal">
-          <p className="text-body text-text-primary leading-relaxed">
-            If an account exists for that email, a reset link is on its way. The link expires in 30 minutes.
-          </p>
-          <AuthFooterLink to="/login">Back to sign in</AuthFooterLink>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4 animate-reveal">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required autoFocus />
-          <Button type="submit" variant="primary" size="lg" disabled={loading} className="w-full">
-            {loading ? 'Sending…' : 'Send reset link'}
-          </Button>
-          <div className="text-center">
-            <AuthFooterLink to="/login">Back to sign in</AuthFooterLink>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="space-y-1">
+          <label className="text-[12px] font-medium text-text-secondary" htmlFor="email">
+            Email
+          </label>
+          <div className="relative">
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              required
+              autoFocus
+              autoComplete="email"
+              className="input-field pl-10"
+            />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
           </div>
-        </form>
-      )}
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 mt-1 rounded-xl bg-accent text-white font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-60 transition-colors focus-ring"
+        >
+          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {loading ? 'Sending…' : 'Send reset link'}
+        </button>
+      </form>
     </AuthLayout>
   )
 }

@@ -90,16 +90,48 @@ export type Invitation = {
   team_name: string | null
 }
 
+export type Draft = {
+  id: string
+  label: string
+  detail: string | null
+  kind: string | null
+  role: string | null
+  generated_at: string | null
+  generated_by_user_id: string | null
+  user_id: string | null
+  team_id: string | null
+  is_private: boolean
+  importance?: number
+  is_stale?: boolean
+  meta: string | null
+  created_at: string
+  updated_at: string
+  last_seen_at: string
+  company_id: string
+}
+
+export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed'
+
 export type Task = {
   id: string
   label: string
-  detail?: string
-  status: 'pending' | 'running' | 'completed' | 'failed'
-  assigned_to?: string
+  detail?: string | null
+  status: TaskStatus
+  assigned_to?: string | null
   node_id?: string
   company_id: string
   created_at: string
   updated_at: string
+  importance?: number
+  is_stale?: boolean
+  meta?: string | null
+  last_seen_at?: string
+}
+
+export type CitationSourceEvent = {
+  id: string
+  source: string
+  processed_at: string
 }
 
 export type Citation = {
@@ -108,6 +140,13 @@ export type Citation = {
   type: NodeType
   importance: number
   contribution: string
+  near_expiry?: boolean
+  detail_snippet?: string
+  source_event?: CitationSourceEvent
+}
+
+export type GraphNodeWithSource = GraphNode & {
+  _source_event?: CitationSourceEvent
   near_expiry?: boolean
 }
 
@@ -158,5 +197,17 @@ export const NODE_TYPE_LABEL: Record<NodeType, string> = {
 }
 
 export const NODE_TYPE_ORDER: NodeType[] = [
-  'person', 'client', 'topic', 'task', 'event', 'draft', 'agent', 'feature', 'decision', 'architecture', 'alert',
+  'company',
+  'team',
+  'person',
+  'client',
+  'topic',
+  'task',
+  'event',
+  'feature',
+  'decision',
+  'architecture',
+  'draft',
+  'agent',
+  'alert',
 ]

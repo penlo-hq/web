@@ -7,17 +7,58 @@ import type {
   NodeRelationship,
   QueryResult,
   Task,
+  Draft,
   User,
 } from '../../types/graph'
 
 type GraphResponse = { nodes: GraphNode[]; edges: GraphEdge[] }
 type SnapshotResponse = GraphResponse & { snapshot_at: string | null }
 
+export type GraphSnapshotMarker = {
+  snapshot_at: string
+  node_count: number
+  edge_count: number
+}
+
 export const graphApi = {
   company: (): Promise<GraphResponse> => api.get('/api/v1/graph/company').then((r) => r.data),
   me: (): Promise<GraphResponse> => api.get('/api/v1/graph/me').then((r) => r.data),
   team: (teamId: string): Promise<GraphResponse> => api.get(`/api/v1/graph/team/${teamId}`).then((r) => r.data),
   snapshot: (at: string): Promise<SnapshotResponse> => api.get('/api/v1/graph/snapshot', { params: { at } }).then((r) => r.data),
+  snapshots: (): Promise<{ snapshots: GraphSnapshotMarker[] }> =>
+    api.get('/api/v1/graph/snapshots').then((r) => r.data),
+}
+
+export type TimelinePushNode = { id: string; label: string; type: string }
+
+export type TimelinePushDTO = {
+  id: string
+  source: string
+  summary: string
+  processed_at: string
+  user_id: string | null
+  user_name: string | null
+  delta: { created: number; merged: number; edges: number }
+  nodes: TimelinePushNode[]
+  nodes_hidden: number
+  snapshot_at: string | null
+  graph_totals_at_snapshot: { nodes: number; edges: number } | null
+}
+
+export type TimelinePushesResponse = {
+  pushes: TimelinePushDTO[]
+  has_more: boolean
+  next_cursor: string | null
+}
+
+export const timelineApi = {
+  pushes: (params: {
+    since?: string
+    before?: string
+    limit?: number
+    source?: string
+  } = {}): Promise<TimelinePushesResponse> =>
+    api.get('/api/v1/timeline/pushes', { params }).then((r) => r.data),
 }
 
 export const nodeApi = {
@@ -43,9 +84,83 @@ export const queryApi = {
   }) => api.post('/api/v1/query/feedback', body).then((r) => r.data),
 }
 
+function normalizeTaskStatus(raw: unknown): Task['status'] {
+  const s = typeof raw === 'string' ? raw.toLowerCase().replace(/-/g, '_') : ''
+  if (s === 'running' || s === 'in_progress') return 'running'
+  if (s === 'completed' || s === 'done') return 'completed'
+  if (s === 'failed') return 'failed'
+  return 'pending'
+}
+
+/** Map API node or flat task payload to Task (defensive for legacy nested properties). */
+export function normalizeTask(row: Record<string, unknown>): Task {
+  const props = (row.properties as Record<string, unknown> | undefined) ?? {}
+  const statusRaw = row.status ?? props.status
+  const assignee = row.assigned_to ?? props.assignee ?? props.assigned_to
+  let assigned: string | null = null
+  if (typeof assignee === 'string') assigned = assignee
+  else if (assignee && typeof assignee === 'object' && 'name' in assignee) {
+    assigned = String((assignee as { name?: string }).name ?? '')
+  }
+  return {
+    id: String(row.id),
+    label: String(row.label ?? ''),
+    detail: row.detail != null ? String(row.detail) : null,
+    status: normalizeTaskStatus(statusRaw),
+    assigned_to: assigned,
+    node_id: row.node_id != null ? String(row.node_id) : String(row.id),
+    company_id: String(row.company_id),
+    created_at: String(row.created_at ?? ''),
+    updated_at: String(row.updated_at ?? ''),
+    importance: typeof row.importance === 'number' ? row.importance : undefined,
+    is_stale: Boolean(row.is_stale),
+    meta: row.meta != null ? String(row.meta) : null,
+    last_seen_at: row.last_seen_at != null ? String(row.last_seen_at) : undefined,
+  }
+}
+
 export const tasksApi = {
-  list: (): Promise<Task[]> => api.get('/api/v1/tasks').then((r) => r.data),
-  patch: (id: string, body: { status?: string }) => api.patch(`/api/v1/tasks/${id}`, body).then((r) => r.data),
+  list: (): Promise<Task[]> =>
+    api.get('/api/v1/tasks').then((r) => (r.data as Record<string, unknown>[]).map(normalizeTask)),
+  patch: (id: string, body: { status?: string; detail?: string }): Promise<Task> =>
+    api.patch(`/api/v1/tasks/${id}`, body).then((r) => normalizeTask(r.data as Record<string, unknown>)),
+}
+
+export function normalizeDraft(row: Record<string, unknown>): Draft {
+  const props = (row.properties as Record<string, unknown> | undefined) ?? {}
+  return {
+    id: String(row.id),
+    label: String(row.label ?? ''),
+    detail: row.detail != null ? String(row.detail) : null,
+    kind: (row.kind ?? props.kind) != null ? String(row.kind ?? props.kind) : null,
+    role: (row.role ?? props.role) != null ? String(row.role ?? props.role) : null,
+    generated_at:
+      (row.generated_at ?? props.generated_at) != null
+        ? String(row.generated_at ?? props.generated_at)
+        : null,
+    generated_by_user_id:
+      (row.generated_by_user_id ?? props.generated_by_user_id) != null
+        ? String(row.generated_by_user_id ?? props.generated_by_user_id)
+        : null,
+    user_id: row.user_id != null ? String(row.user_id) : null,
+    team_id: row.team_id != null ? String(row.team_id) : null,
+    is_private: Boolean(row.is_private),
+    importance: typeof row.importance === 'number' ? row.importance : undefined,
+    is_stale: Boolean(row.is_stale),
+    meta: row.meta != null ? String(row.meta) : null,
+    created_at: String(row.created_at ?? ''),
+    updated_at: String(row.updated_at ?? ''),
+    last_seen_at: String(row.last_seen_at ?? row.updated_at ?? ''),
+    company_id: String(row.company_id ?? ''),
+  }
+}
+
+export const draftsApi = {
+  list: (): Promise<Draft[]> =>
+    api.get('/api/v1/drafts').then((r) => (r.data as Record<string, unknown>[]).map(normalizeDraft)),
+  patch: (id: string, body: { detail?: string }): Promise<Draft> =>
+    api.patch(`/api/v1/drafts/${id}`, body).then((r) => normalizeDraft(r.data as Record<string, unknown>)),
+  delete: (id: string): Promise<void> => api.delete(`/api/v1/drafts/${id}`).then(() => undefined),
 }
 
 export const ingestApi = {
@@ -119,12 +234,37 @@ export const broadcastsApi = {
 
 export type DispatchMode = 'auto' | 'mcp'
 
+export type DispatchRelatedDecision = {
+  label: string
+  detail: string | null
+}
+
+export type DispatchRelatedPerson = {
+  label: string
+}
+
+export type DispatchExecutionTraceEntry = {
+  tool: string
+  input: Record<string, string>
+  result: string
+}
+
 export type DispatchCardDTO = {
   id: string
+  feature_node_id: string | null
   feature_label: string
   feature_summary: string
   source: string | null
   complexity: string | null
+  node_type: string | null
+  detail: string | null
+  related_decisions: DispatchRelatedDecision[]
+  related_people: DispatchRelatedPerson[]
+  acceptance_criteria: string[]
+  build_brief_preview: string | null
+  execution_trace?: DispatchExecutionTraceEntry[]
+  github_repo: string | null
+  github_base_branch: string
   status: string
   mode: DispatchMode
   pr_url: string | null
@@ -134,15 +274,25 @@ export type DispatchCardDTO = {
   expires_at: string
 }
 
+export type ApproveOptions = {
+  mode: DispatchMode
+  github_repo?: string | null
+  github_base_branch?: string
+}
+
 export const dispatchApi = {
   list: (status?: string): Promise<DispatchCardDTO[]> =>
     api.get('/api/v1/dispatches', { params: status ? { status } : {} }).then((r) => r.data),
   count: (): Promise<{ count: number }> =>
     api.get('/api/v1/dispatches/count').then((r) => r.data),
-  approve: (id: string, mode: DispatchMode = 'mcp'): Promise<DispatchCardDTO> =>
-    api.post(`/api/v1/dispatches/${id}/approve`, { mode }).then((r) => r.data),
+  approve: (id: string, opts: ApproveOptions): Promise<DispatchCardDTO> =>
+    api.post(`/api/v1/dispatches/${id}/approve`, opts).then((r) => r.data),
   discard: (id: string): Promise<void> =>
     api.post(`/api/v1/dispatches/${id}/discard`).then(() => undefined),
+  getGitHubSettings: (): Promise<{ github_repo: string | null; github_base_branch: string }> =>
+    api.get('/api/v1/admin/github-settings').then((r) => r.data),
+  upsertGitHubSettings: (github_repo: string, github_base_branch = 'main') =>
+    api.post('/api/v1/admin/github-settings', { github_repo, github_base_branch }).then((r) => r.data),
 }
 
 export type SlackWorkspaceDTO = {
@@ -162,14 +312,26 @@ export type SlackChannelDTO = {
   is_subscribed: boolean
 }
 
+export type SlackStatusDTO = {
+  oauth_configured: boolean
+  signing_secret_configured: boolean
+  events_webhook_url: string
+  slash_command_url: string
+  workspaces_connected: number
+}
+
 export const slackApi = {
+  getStatus: (): Promise<SlackStatusDTO> =>
+    api.get('/api/v1/slack/status').then((r) => r.data),
+  getAuthorizeUrl: (): Promise<{ url: string }> =>
+    api.get('/api/v1/slack/oauth/authorize-url').then((r) => r.data),
   listWorkspaces: (): Promise<SlackWorkspaceDTO[]> =>
     api.get('/api/v1/slack/workspaces').then((r) => r.data),
   listChannels: (wsId: string): Promise<SlackChannelDTO[]> =>
     api.get(`/api/v1/slack/workspaces/${wsId}/channels`).then((r) => r.data),
-  setSubscription: (wsId: string, channelId: string, enabled: boolean, channelName: string) =>
+  setSubscription: (wsId: string, channelId: string, enabled: boolean, channelName: string): Promise<{ status: string }> =>
     api.put(`/api/v1/slack/workspaces/${wsId}/channels/${channelId}`, { enabled, channel_name: channelName }).then((r) => r.data),
-  disconnect: (wsId: string) =>
+  disconnect: (wsId: string): Promise<{ status: string }> =>
     api.delete(`/api/v1/slack/workspaces/${wsId}`).then((r) => r.data),
 }
 

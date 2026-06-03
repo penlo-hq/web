@@ -63,6 +63,27 @@ export function ConnectApp({ onMenuClick }: PageProps) {
       <TopBar title="Connect App" subtitle="Link your iOS device to Enterprise Brain" onMenuClick={onMenuClick} />
 
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6 max-w-4xl">
+        <SettingsSection
+          title="Pair Flow on iPhone"
+          description="After you generate a key below, open Penlo Flow on your iPhone to finish setup."
+        >
+          <ol className="space-y-2 text-caption text-text-secondary list-decimal pl-4 mb-4">
+            <li>Install and open the Penlo Flow app on your iPhone.</li>
+            <li>Copy the Endpoint URL and API key from this page.</li>
+            <li>In Flow onboarding (or Settings → Enterprise Brain), paste the URL and key, then tap Test Connection.</li>
+            <li>Add your Claude API key in Flow to enable on-device extraction and chat.</li>
+          </ol>
+          <a
+            href="penlo://setup"
+            className="inline-flex items-center gap-2 text-caption font-medium text-accent hover:underline"
+          >
+            Open Flow setup on this device
+          </a>
+          <p className="mt-2 text-caption-sm text-text-secondary">
+            Deep link works when Flow is installed. Otherwise open Flow manually and use Setup guide.
+          </p>
+        </SettingsSection>
+
         <SettingsSection title="Endpoint URL" description="Copy this URL into the Penlo iOS app under Settings → Enterprise Brain.">
           <p className="text-caption text-text-secondary mb-3">
             For the Chrome meeting-capture extension, use the brain <strong>base URL</strong> only — it posts to{' '}

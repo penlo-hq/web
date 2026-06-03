@@ -3,46 +3,33 @@ import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import type { NodeType } from '../../types/graph'
+import { labelOffset, renderRadius, type NodeVisualState } from '../../lib/graph/nodeVisuals'
 
-// Exact dashboard palette colors — readable on white background
 const NODE_COLOR: Record<NodeType, string> = {
-  company:  '#0a0a0a',  // ink
-  team:     '#2b2b2b',  // graphite
-  person:   '#3d3d3d',  // dark gray
-  client:   '#b45309',  // amber.brain
-  topic:    '#6b6b6b',  // stone
-  task:     '#2b2b2b',  // graphite
-  event:    '#4a4a4a',  // mid gray
-  draft:    '#9a9a9a',  // light gray (secondary)
-  agent:    '#0a0a0a',  // ink
-  feature:  '#1d4ed8',  // blue.brain
-  decision: '#854d0e',  // decision.fg
-  alert:    '#d97706',  // amber (drift)
-}
-
-const NODE_RADIUS: Record<NodeType, number> = {
-  company: 22,
-  team: 14,
-  person: 8,
-  client: 7,
-  topic: 6,
-  task: 5,
-  event: 5,
-  draft: 5,
-  agent: 7,
-  feature: 6,
-  decision: 6,
-  alert: 8,
+  company: '#0a0a0a',
+  team: '#2b2b2b',
+  person: '#3d3d3d',
+  client: '#b45309',
+  topic: '#6b6b6b',
+  task: '#2b2b2b',
+  event: '#4a4a4a',
+  draft: '#9a9a9a',
+  agent: '#0a0a0a',
+  feature: '#1d4ed8',
+  decision: '#854d0e',
+  architecture: '#0369a1',
+  alert: '#d97706',
 }
 
 type Props = {
   id: string
   type: NodeType
   label: string
+  importance: number
   x: number
   y: number
   z: number
-  isFocused: boolean
+  isHovered: boolean
   isSelected: boolean
   isDimmed: boolean
   isStale?: boolean
@@ -64,77 +51,133 @@ function usePrefersReducedMotion(): boolean {
   return reduced
 }
 
-export function Node3D({ type, label, x, y, z, isFocused, isSelected, isDimmed, isStale, onPointerOver, onPointerOut, onClick }: Props) {
+export function Node3D({
+  type,
+  label,
+  importance,
+  x,
+  y,
+  z,
+  isHovered,
+  isSelected,
+  isDimmed,
+  isStale,
+  onPointerOver,
+  onPointerOut,
+  onClick,
+}: Props) {
   const meshRef = useRef<THREE.Mesh>(null)
+  const ringRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.MeshStandardMaterial>(null)
   const [hovered, setHovered] = useState(false)
-  const targetScale = useRef(1)
+  const currentScale = useRef(1)
   const reducedMotion = usePrefersReducedMotion()
 
-  const r = NODE_RADIUS[type]
+  const visualState: NodeVisualState = { isSelected, isHovered: isHovered || hovered, isDimmed }
+  const baseR = renderRadius({ type, importance }, { isDimmed })
+  const targetR = renderRadius({ type, importance }, visualState)
   const color = NODE_COLOR[type]
-  const active = isFocused || isSelected
-  const pulseAlert = type === 'alert' && !isStale && !reducedMotion
+  const pulseAlert = type === 'alert' && !isStale && !reducedMotion && !isSelected
 
-  targetScale.current = active ? 1.35 : isDimmed ? 0.85 : 1
+  const showLabel =
+    isSelected || isHovered || hovered || type === 'company' || type === 'team'
 
   useFrame(({ clock }) => {
+    const targetScale = targetR / baseR
+    currentScale.current = THREE.MathUtils.lerp(currentScale.current, targetScale, 0.14)
     if (meshRef.current) {
-      meshRef.current.scale.setScalar(
-        THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale.current, 0.12)
-      )
+      meshRef.current.scale.setScalar(currentScale.current)
+    }
+    if (ringRef.current && isSelected) {
+      const pulse = reducedMotion ? 1 : 1 + Math.sin(clock.getElapsedTime() * 2.5) * 0.04
+      ringRef.current.scale.setScalar(pulse)
     }
     if (materialRef.current) {
       if (pulseAlert) {
         const t = (Math.sin(clock.getElapsedTime() * 2.2) + 1) / 2
         materialRef.current.emissiveIntensity = 0.05 + t * 0.07
+      } else if (isSelected) {
+        materialRef.current.emissiveIntensity = 0.14
+      } else if (isHovered || hovered) {
+        materialRef.current.emissiveIntensity = 0.06
       } else if (type === 'alert') {
         materialRef.current.emissiveIntensity = 0.08
       } else {
-        materialRef.current.emissiveIntensity = isSelected ? 0.08 : 0
+        materialRef.current.emissiveIntensity = 0
       }
     }
   })
 
-  const showLabel = active || type === 'company' || type === 'team' || hovered
+  const displayR = baseR * currentScale.current
 
   return (
     <group position={[x, y, z]}>
+      {isSelected && (
+        <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[baseR + 3, 1.2, 16, 48]} />
+          <meshBasicMaterial color="#1d4ed8" transparent opacity={0.45} />
+        </mesh>
+      )}
+
       <mesh
         ref={meshRef}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); onPointerOver() }}
-        onPointerOut={(e) => { e.stopPropagation(); setHovered(false); onPointerOut() }}
-        onClick={(e) => { e.stopPropagation(); onClick(e) }}
+        onPointerOver={(e) => {
+          e.stopPropagation()
+          setHovered(true)
+          onPointerOver()
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation()
+          setHovered(false)
+          onPointerOut()
+        }}
+        onClick={(e) => {
+          e.stopPropagation()
+          onClick(e)
+        }}
       >
-        <sphereGeometry args={[r, 40, 40]} />
+        <sphereGeometry args={[baseR, 40, 40]} />
         <meshStandardMaterial
           ref={materialRef}
           color={color}
-          emissive={color}
+          emissive={isSelected ? '#1d4ed8' : color}
           emissiveIntensity={0}
           roughness={0.55}
           metalness={0}
           transparent
-          opacity={isDimmed ? 0.05 : 1}
+          opacity={isDimmed ? 0.12 : 1}
         />
       </mesh>
 
       {showLabel && (
         <Html
           center
-          distanceFactor={340}
-          style={{ pointerEvents: 'none', whiteSpace: 'nowrap' }}
-          position={[0, r + 5, 0]}
+          distanceFactor={320}
+          zIndexRange={isSelected ? [100, 0] : [50, 0]}
+          style={{ pointerEvents: 'none' }}
+          position={[0, labelOffset(displayR), 0]}
         >
-          <span style={{
-            fontSize: 11,
-            fontWeight: active ? 600 : 400,
-            color: active ? '#0a0a0a' : '#6b6b6b',
-            fontFamily: 'ui-monospace, "JetBrains Mono", monospace',
-            letterSpacing: '0.04em',
-          }}>
-            {label.length > 22 ? label.slice(0, 20) + '…' : label}
-          </span>
+          <div
+            className={`max-w-[200px] rounded-lg border px-2.5 py-1.5 shadow-sm backdrop-blur-sm ${
+              isSelected
+                ? 'border-accent/30 bg-white/95'
+                : 'border-black/[0.08] bg-white/90'
+            }`}
+          >
+            <p
+              className={`text-[13px] leading-snug font-medium text-text-primary ${
+                isSelected ? '' : 'line-clamp-2'
+              }`}
+              style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+            >
+              {label.length > 48 && !isSelected ? `${label.slice(0, 46)}…` : label}
+            </p>
+            {isSelected && (
+              <p className="text-[10px] text-accent font-semibold mt-0.5 tabular-nums">
+                {(importance * 100).toFixed(0)}% importance
+              </p>
+            )}
+          </div>
         </Html>
       )}
     </group>

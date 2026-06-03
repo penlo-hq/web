@@ -135,8 +135,8 @@ export function NotificationSettings({ onMenuClick }: PageProps) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
-      <TopBar title="Notifications" subtitle="Settings" onMenuClick={onMenuClick} />
-      <div className="flex-1 overflow-y-auto px-5 py-6 max-w-2xl space-y-6">
+      <TopBar title="Notifications" subtitle="Delivery preferences" onMenuClick={onMenuClick} />
+      <div className="flex-1 overflow-y-auto px-5 py-5 max-w-2xl space-y-5">
         {CATEGORIES.map((cat) => (
           <SettingsSection key={cat.id} title={cat.label} description={cat.desc}>
             <div className="flex flex-wrap gap-3">
@@ -162,33 +162,47 @@ export function NotificationSettings({ onMenuClick }: PageProps) {
               type="time"
               value={quietStart}
               onChange={(e) => setQuietStart(e.target.value)}
-              className="rounded-lg border border-text-secondary/20 px-3 py-2 text-sm"
+              className="input-field w-auto"
             />
-            <span className="text-text-secondary">to</span>
+            <span className="text-[13px] text-text-secondary">to</span>
             <input
               type="time"
               value={quietEnd}
               onChange={(e) => setQuietEnd(e.target.value)}
-              className="rounded-lg border border-text-secondary/20 px-3 py-2 text-sm"
+              className="input-field w-auto"
             />
-            <Button variant="secondary" size="sm" onClick={() => void saveQuietHours()} disabled={saving}>
+            <button
+              onClick={() => void saveQuietHours()}
+              disabled={saving}
+              className="px-3 py-1.5 rounded-xl bg-accent text-white text-[12px] font-medium hover:bg-accent/90 disabled:opacity-50 transition-colors"
+            >
               Save
-            </Button>
+            </button>
           </div>
         </SettingsSection>
 
         <SettingsSection title="Browser push" description="Get alerts when Penlo is in the background">
           <div className="flex items-center gap-3 flex-wrap">
-            <Button variant="primary" size="sm" onClick={() => void enablePush()}>
-              Enable push
-            </Button>
-            <span className="text-caption-sm text-text-secondary">Status: {pushStatus}</span>
+            <button
+              onClick={() => void enablePush()}
+              className="px-3 py-1.5 rounded-xl bg-accent text-white text-[12px] font-medium hover:bg-accent/90 transition-colors"
+            >
+              Enable push notifications
+            </button>
+            <span className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${
+              pushStatus === 'granted' ? 'bg-success-tint text-success' : 'bg-black/[0.05] text-text-secondary'
+            }`}>
+              {pushStatus === 'granted' ? 'Enabled' : pushStatus === 'denied' ? 'Blocked' : pushStatus}
+            </span>
           </div>
         </SettingsSection>
 
-        <Button variant="ghost" onClick={() => void sendTest()}>
-          Send test in-app notification
-        </Button>
+        <button
+          onClick={() => void sendTest()}
+          className="px-4 py-2 rounded-xl border border-black/[0.08] text-[13px] text-text-secondary hover:text-text-primary hover:bg-black/[0.02] transition-colors"
+        >
+          Send test notification
+        </button>
       </div>
     </motion.div>
   )

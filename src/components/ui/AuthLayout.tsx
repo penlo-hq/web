@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { LiquidOrb } from './LiquidOrb'
-import { SectionLabel } from './SectionLabel'
+import { Sparkles } from 'lucide-react'
 
 type Props = {
   title: string
@@ -12,20 +11,36 @@ type Props = {
 
 export function AuthLayout({ title, subtitle, children, footer }: Props) {
   return (
-    <div className="min-h-screen bg-canvas flex flex-col items-center justify-center px-5 py-12">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center px-5 py-12">
+      <div className="w-full max-w-[380px]">
+        {/* Penlo logo mark */}
         <div className="flex flex-col items-center mb-8">
-          <LiquidOrb size={72} className="mb-4" />
-          <SectionLabel className="mb-1">Penlo</SectionLabel>
-          <h1 className="font-display font-semibold text-[22px] text-text-primary tracking-tight text-center">
+          <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mb-4 shadow-card-raised">
+            <Sparkles className="w-6 h-6 text-white" strokeWidth={2} />
+          </div>
+          <p className="text-[11px] font-semibold tracking-[0.10em] text-text-tertiary uppercase mb-1.5">
+            Penlo
+          </p>
+          <h1 className="font-semibold text-[24px] text-text-primary text-center leading-tight">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-caption text-text-secondary text-center mt-2">{subtitle}</p>
+            <p className="text-[14px] text-text-secondary text-center mt-2 leading-relaxed max-w-[280px]">
+              {subtitle}
+            </p>
           )}
         </div>
-        {children}
-        {footer && <div className="mt-6 text-center text-caption text-text-secondary">{footer}</div>}
+
+        {/* Card */}
+        <div className="bg-white rounded-[20px] shadow-card-raised p-6 border border-black/[0.06]">
+          {children}
+        </div>
+
+        {footer && (
+          <div className="mt-5 text-center text-[13px] text-text-secondary">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   )

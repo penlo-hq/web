@@ -43,6 +43,7 @@ type EditDraft = { detail: string; meta: string; is_private: boolean }
 
 export function NodeDetailPanel({ selectedId, onClose }: Props) {
   const nodes = useGraphStore((s) => s.nodes)
+  const setSelected = useGraphStore((s) => s.setSelected)
   const updateNode = useGraphStore((s) => s.updateNode)
   const user = useAuthStore((s) => s.user)
   const [detail, setDetail] = useState<NodeDetail | null>(null)
@@ -154,16 +155,34 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 320, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-          className="absolute right-0 top-0 h-full w-[300px] bg-white/95 backdrop-blur-sm border-l border-mist shadow-[−4px_0_24px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden"
+          className="absolute right-0 top-0 h-full w-full max-w-[min(360px,38vw)] min-w-[280px] bg-white/95 backdrop-blur-md border-l border-black/[0.08] shadow-[-8px_0_32px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden z-20"
         >
           <div className="flex items-start justify-between px-5 pt-5 pb-3">
-            <div>
-              <span className="text-[9.5px] uppercase tracking-[0.22em] text-stone">
-                {node ? NODE_TYPE_LABEL[node.type] : ''}
-              </span>
-              <h2 className="mt-1 text-[18px] font-display font-bold tracking-tightest text-ink leading-tight">
+            <div className="min-w-0 flex-1 pr-2">
+              {node && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-accent/10 text-accent">
+                  {NODE_TYPE_LABEL[node.type]}
+                </span>
+              )}
+              <h2 className="mt-2 text-[18px] font-semibold tracking-tight text-text-primary leading-snug line-clamp-2">
                 {node?.label ?? ''}
               </h2>
+              {node && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-[11px] text-text-tertiary mb-1">
+                    <span>Importance</span>
+                    <span className="tabular-nums font-medium text-text-secondary">
+                      {(node.importance * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-black/[0.06] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-300"
+                      style={{ width: `${Math.round(node.importance * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               {canEdit && node && (
@@ -261,19 +280,15 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
           )}
 
           <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-            {loading && (
-              <div className="flex items-center gap-2 text-[12px] text-stone">
-                <span className="animate-spin">○</span> Loading…
-              </div>
-            )}
+            {loading && <PanelSkeleton />}
 
-            {tab === 'overview' && (
+            {!loading && tab === 'overview' && (
               <>
                 {node?.detail && (
-                  <p className="text-[13px] text-graphite leading-relaxed">{node.detail}</p>
+                  <p className="text-[13px] text-text-secondary leading-relaxed">{node.detail}</p>
                 )}
                 {node?.meta && (
-                  <span className="inline-block text-[10.5px] uppercase tracking-[0.16em] text-stone">{node.meta}</span>
+                  <span className="inline-block text-[11px] font-medium text-text-tertiary">{node.meta}</span>
                 )}
 
                 {detail?.alert && (
@@ -291,34 +306,32 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
 
                 {detail?.neighbors && detail.neighbors.length > 0 && (
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-stone mb-2">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary mb-2">
                       Connected · {detail.neighbors.length}
                     </div>
-                    <div className="flex flex-col gap-1.5 max-h-[200px] overflow-y-auto">
+                    <div className="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto">
                       {detail.neighbors.map((n) => (
                         <button
                           key={n.id}
-                          onClick={() => useGraphStore.getState().setSelected(n.id)}
-                          className="text-left flex items-center gap-2 group"
+                          type="button"
+                          onClick={() => setSelected(n.id)}
+                          className="inline-flex items-center gap-1.5 max-w-full px-2.5 py-1.5 rounded-lg border border-black/[0.08] bg-canvas hover:border-accent/30 hover:bg-accent/5 transition-colors text-left focus-ring"
                         >
-                          <span className="text-[9.5px] uppercase tracking-[0.14em] text-stone w-14 shrink-0">
+                          <span className="text-[9px] font-semibold uppercase tracking-wide text-accent shrink-0">
                             {NODE_TYPE_LABEL[n.type]}
                           </span>
-                          <span className="text-[12.5px] text-graphite group-hover:text-ink transition-colors truncate">
-                            {n.label}
-                          </span>
+                          <span className="text-[12px] text-text-primary truncate">{n.label}</span>
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {node && (
-                  <div className="pt-3 border-t border-mist">
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-stone mb-2">Properties</div>
-                    <div className="text-[11.5px] text-stone space-y-1">
-                      <div>Importance: <span className="text-graphite">{(node.importance * 100).toFixed(0)}%</span></div>
-                      <div>Last seen: <span className="text-graphite">{new Date(node.last_seen_at).toLocaleDateString()}</span></div>
+                {node && !loading && (
+                  <div className="pt-3 border-t border-black/[0.06]">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary mb-2">Properties</div>
+                    <div className="text-[12px] text-text-tertiary space-y-1">
+                      <div>Last seen: <span className="text-text-secondary">{new Date(node.last_seen_at).toLocaleDateString()}</span></div>
                       {typeof detail?.cited_in_count === 'number' && detail.cited_in_count > 0 && (
                         <div>
                           <button
@@ -353,7 +366,7 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
               </>
             )}
 
-            {tab === 'relationships' && (
+            {!loading && tab === 'relationships' && (
               <RelationshipsSection
                 loading={relationshipsLoading}
                 rows={relationships}
@@ -481,6 +494,21 @@ function ArchaeologySection({ arch }: { arch: Archaeology }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function PanelSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse" aria-hidden>
+      <div className="h-4 bg-black/[0.06] rounded w-full" />
+      <div className="h-4 bg-black/[0.06] rounded w-4/5" />
+      <div className="h-3 bg-black/[0.05] rounded w-1/3 mt-4" />
+      <div className="flex flex-wrap gap-2 mt-2">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-8 w-24 bg-black/[0.06] rounded-lg" />
+        ))}
+      </div>
     </div>
   )
 }

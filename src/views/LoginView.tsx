@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '../lib/api/endpoints'
 import { publicApi } from '../lib/api/client'
-import { AuthLayout, AuthFooterLink, Button, Input } from '../components/ui'
+import { AuthLayout, AuthFooterLink } from '../components/ui'
 
 declare global {
   interface Window {
@@ -43,6 +44,7 @@ function loadGoogleScript(): Promise<void> {
 export function LoginView() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleError, setGoogleError] = useState<string | null>(null)
@@ -60,7 +62,7 @@ export function LoginView() {
       setUser(data.user)
       navigate('/brain/company')
     } catch {
-      setError('Invalid credentials')
+      setError('Invalid email or password. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -108,7 +110,7 @@ export function LoginView() {
           theme: 'outline',
           size: 'large',
           text: 'signin_with',
-          width: 320,
+          width: 328,
         })
       })
       .catch(() => {
@@ -116,55 +118,106 @@ export function LoginView() {
         setGoogleError("Couldn't load Google sign-in.")
       })
 
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [googleClientId, navigate, setUser])
 
   return (
     <AuthLayout
-      title="Enterprise Brain"
+      title="Welcome back"
       subtitle="Sign in to access your company's knowledge graph."
+      footer={
+        <p>
+          Don&apos;t have an account?{' '}
+          <AuthFooterLink to="/signup">Get started</AuthFooterLink>
+        </p>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4 animate-reveal">
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-        />
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
-        {error && <p className="text-caption-sm text-destructive bg-destructive-tint px-3 py-2 rounded-card">{error}</p>}
-        <Button type="submit" variant="primary" size="lg" disabled={loading} className="w-full">
-          {loading ? 'Signing in…' : 'Sign in'}
-        </Button>
-        <div className="text-center">
-          <AuthFooterLink to="/forgot-password">Forgot password?</AuthFooterLink>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        {/* Email */}
+        <div className="space-y-1">
+          <label className="text-[12px] font-medium text-text-secondary" htmlFor="email">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@company.com"
+            required
+            autoComplete="email"
+            className="input-field"
+          />
         </div>
+
+        {/* Password */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <label className="text-[12px] font-medium text-text-secondary" htmlFor="password">
+              Password
+            </label>
+            <AuthFooterLink to="/forgot-password">
+              <span className="text-[12px]">Forgot?</span>
+            </AuthFooterLink>
+          </div>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              autoComplete="current-password"
+              className="input-field pr-10"
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-destructive-tint">
+            <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+            <p className="text-[12px] text-destructive leading-tight">{error}</p>
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 mt-1 rounded-xl bg-accent text-white font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-60 transition-colors focus-ring"
+        >
+          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
       </form>
 
       {googleClientId && (
-        <div className="mt-6 animate-reveal">
+        <div className="mt-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-text-secondary/15" />
-            <span className="text-caption-sm uppercase tracking-section text-text-secondary">or</span>
-            <div className="flex-1 h-px bg-text-secondary/15" />
+            <div className="flex-1 h-px bg-black/[0.08]" />
+            <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-black/[0.08]" />
           </div>
           <div id="penlo-google-btn" className="flex justify-center" />
-          {googleError && <p className="mt-3 text-caption-sm text-destructive">{googleError}</p>}
+          {googleError && (
+            <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-xl bg-destructive-tint">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+              <p className="text-[12px] text-destructive">{googleError}</p>
+            </div>
+          )}
         </div>
       )}
-
-      <p className="mt-6 text-caption text-text-secondary text-center">
-        Don&apos;t have an account? Use an invite link.
-      </p>
     </AuthLayout>
   )
 }

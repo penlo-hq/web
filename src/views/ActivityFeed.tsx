@@ -1,10 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Activity } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { ActivityCard } from '../components/activity/ActivityCard'
+import { EmptyState } from '../components/ui'
 import { activityApi } from '../lib/api/endpoints'
 import { useActivityStore } from '../store/activityStore'
+import type { ActivityEventDTO } from '../lib/api/endpoints'
 import type { PageProps } from '../types/layout'
+
+function dayLabel(iso: string): string {
+  const date = new Date(iso)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const days = Math.floor(diff / 86_400_000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  return date.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
+}
+
+function groupByDay(events: ActivityEventDTO[]): { label: string; events: ActivityEventDTO[] }[] {
+  const groups: Map<string, ActivityEventDTO[]> = new Map()
+  for (const e of events) {
+    const label = dayLabel(e.processed_at)
+    if (!groups.has(label)) groups.set(label, [])
+    groups.get(label)!.push(e)
+  }
+  return [...groups.entries()].map(([label, events]) => ({ label, events }))
+}
 
 const SOURCE_FILTERS: { value: string; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -66,21 +89,23 @@ export function ActivityFeed({ onMenuClick }: PageProps) {
   }
 
   const visible = filter === 'all' ? events : events.filter((e) => e.source === filter)
+  const grouped = useMemo(() => groupByDay(visible), [visible])
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
-      <TopBar onMenuClick={onMenuClick} title="Activity" subtitle="What the brain just learned" />
-      <div className="flex-1 overflow-y-auto px-5 py-6">
-        <div className="flex gap-1.5 mb-5 max-w-2xl">
+      <TopBar onMenuClick={onMenuClick} title="Activity" subtitle="What the brain learned" />
+      <div className="flex-1 overflow-y-auto px-5 py-5">
+        {/* Source filters */}
+        <div className="flex gap-1.5 flex-wrap mb-5 max-w-2xl">
           {SOURCE_FILTERS.map((f) => (
             <button
               key={f.value}
               type="button"
               onClick={() => setFilter(f.value)}
-              className={`px-3 py-1 rounded-full text-[11px] uppercase tracking-[0.16em] transition-colors ${
+              className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide transition-colors ${
                 filter === f.value
                   ? 'bg-accent text-white'
-                  : 'border border-text-secondary/10 text-text-secondary hover:border-accent/30 hover:text-text-primary'
+                  : 'bg-black/[0.04] text-text-secondary hover:bg-black/[0.08] hover:text-text-primary'
               }`}
             >
               {f.label}
@@ -91,49 +116,57 @@ export function ActivityFeed({ onMenuClick }: PageProps) {
         {loading && (
           <div className="space-y-2 max-w-2xl">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-20 rounded-xl border border-text-secondary/10 bg-surface animate-pulse" />
+              <div key={i} className="skeleton h-20 rounded-2xl" />
             ))}
           </div>
         )}
 
         {!loading && error && (
           <div className="max-w-2xl">
-            <p className="text-[13px] text-text-secondary">{error}</p>
-            <button
-              type="button"
-              className="mt-2 text-[11px] uppercase tracking-[0.16em] text-text-primary hover:opacity-70"
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </button>
+            <EmptyState
+              icon={Activity}
+              title="Couldn't load activity"
+              description={error}
+              actionLabel="Retry"
+              onAction={() => window.location.reload()}
+            />
           </div>
         )}
 
         {!loading && !error && visible.length === 0 && (
-          <div className="max-w-md mx-auto mt-12 px-6 py-8 rounded-xl border border-text-secondary/10 bg-surface text-center">
-            <p className="text-[13px] text-text-secondary">
-              Nothing has flowed into the brain in the last 24 hours.
-            </p>
-            <p className="text-[12px] text-text-secondary mt-2">
-              Connect Slack or run a sync from your Penlo device to get started.
-            </p>
-          </div>
+          <EmptyState
+            icon={Activity}
+            title="No activity yet"
+            description="Connect Slack or run a sync from your Penlo device to start capturing context."
+          />
         )}
 
         {!loading && !error && visible.length > 0 && (
-          <div className="space-y-2 max-w-2xl">
-            {visible.map((e) => (
-              <ActivityCard key={e.id} event={e} />
+          <div className="max-w-2xl space-y-6">
+            {grouped.map((group) => (
+              <div key={group.label}>
+                <div className="flex items-center gap-3 mb-3">
+                  <p className="text-[11px] font-semibold tracking-[0.10em] text-text-tertiary uppercase whitespace-nowrap">
+                    {group.label}
+                  </p>
+                  <div className="flex-1 h-px bg-black/[0.06]" />
+                </div>
+                <div className="space-y-2">
+                  {group.events.map((e) => (
+                    <ActivityCard key={e.id} event={e} />
+                  ))}
+                </div>
+              </div>
             ))}
             {hasMore && (
-              <div className="pt-3 text-center">
+              <div className="pt-2 text-center">
                 <button
                   type="button"
                   disabled={loadingMore}
                   onClick={loadOlder}
-                  className="text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl border border-black/[0.08] text-[12px] font-medium text-text-secondary hover:text-text-primary hover:bg-black/[0.03] transition-colors disabled:opacity-50"
                 >
-                  {loadingMore ? 'Loading…' : 'Load older'}
+                  {loadingMore ? 'Loading…' : 'Load older activity'}
                 </button>
               </div>
             )}

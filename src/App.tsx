@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Sidebar } from './components/layout/Sidebar'
@@ -11,7 +11,6 @@ import { MyBrain } from './views/MyBrain'
 import { Timeline } from './views/Timeline'
 import { Tasks } from './views/Tasks'
 import { Drafts } from './views/Drafts'
-import { ActivityFeed } from './views/ActivityFeed'
 import { Outbox } from './views/Outbox'
 import { Dispatch } from './views/Dispatch'
 import { SlackSettings } from './views/SlackSettings'
@@ -60,9 +59,12 @@ function BootGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+const WEB_ONBOARDING_KEY = 'penlo.web.onboarding.completed'
+
 function PrivateLayout() {
   const user = useAuthStore((s) => s.user)
   const location = useLocation()
+  const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -75,6 +77,18 @@ function PrivateLayout() {
   useEffect(() => {
     setMobileOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!user) return
+    if (location.pathname === '/onboarding') return
+    try {
+      if (!localStorage.getItem(WEB_ONBOARDING_KEY)) {
+        navigate('/onboarding', { replace: true })
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [user, location.pathname, navigate])
 
   if (!user) return <Navigate to="/login" replace />
 
@@ -93,8 +107,9 @@ function PrivateLayout() {
               <Route path="/brain/me" element={<MyBrain {...menuProps} />} />
               <Route path="/timeline" element={<Timeline {...menuProps} />} />
               <Route path="/tasks" element={<Tasks {...menuProps} />} />
-              <Route path="/drafts" element={<Drafts {...menuProps} />} />
-              <Route path="/activity" element={<ActivityFeed {...menuProps} />} />
+              <Route path="/drafts" element={<Navigate to="/admin/drafts" replace />} />
+              <Route path="/admin/drafts" element={<RequireAdmin><Drafts {...menuProps} /></RequireAdmin>} />
+              <Route path="/activity" element={<Navigate to="/timeline" replace />} />
               <Route path="/connect" element={<ConnectApp {...menuProps} />} />
               <Route path="/outbox" element={<RequireAdminOrLead><Outbox {...menuProps} /></RequireAdminOrLead>} />
               <Route path="/dispatch" element={<RequireAdminOrLead><Dispatch {...menuProps} /></RequireAdminOrLead>} />

@@ -14,6 +14,7 @@ const FILL: Record<NodeType, string> = {
   agent: '#171717',
   feature: '#eff6ff',
   decision: '#fefce8',
+  architecture: '#f0f9ff',
   alert: '#fef3c7',
 }
 
@@ -29,6 +30,7 @@ const STROKE: Record<NodeType, string> = {
   agent: 'none',
   feature: '#1d4ed8',
   decision: '#854d0e',
+  architecture: '#0369a1',
   alert: '#d97706',
 }
 
@@ -39,13 +41,13 @@ const STROKE_DASH: Partial<Record<NodeType, string>> = {
 
 const STROKE_WIDTH: Record<NodeType, number> = {
   company: 0, team: 0, person: 1.5, client: 1.25, topic: 1,
-  task: 1.25, event: 1, draft: 1, agent: 0, feature: 1.25, decision: 1.5, alert: 1.75,
+  task: 1.25, event: 1, draft: 1, agent: 0, feature: 1.25, decision: 1.5, architecture: 1.25, alert: 1.75,
 }
 
 const LABEL_COLOR: Record<NodeType, string> = {
   company: '#ffffff', team: '#ffffff', person: '#0a0a0a', client: '#92400e',
   topic: '#2b2b2b', task: '#0a0a0a', event: '#0a0a0a', draft: '#0a0a0a',
-  agent: '#ffffff', feature: '#1e40af', decision: '#78350f', alert: '#92400e',
+  agent: '#ffffff', feature: '#1e40af', decision: '#78350f', architecture: '#0369a1', alert: '#92400e',
 }
 
 const INNER_LABEL: Partial<Record<NodeType, string>> = {
