@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '../lib/api/endpoints'
 import { publicApi } from '../lib/api/client'
+import { AuthLayout, AuthFooterLink, Button, Input } from '../components/ui'
 
 declare global {
   interface Window {
@@ -121,67 +122,49 @@ export function LoginView() {
   }, [googleClientId, navigate, setUser])
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-full max-w-sm px-8">
-        <div className="mb-10 animate-reveal">
-          <div className="text-[9.5px] uppercase tracking-[0.22em] text-stone mb-2">Penlo</div>
-          <h1 className="font-display font-bold text-[32px] tracking-tightest text-ink leading-none">
-            Enterprise Brain
-          </h1>
-          <p className="mt-3 text-[14px] text-stone leading-relaxed">Sign in to access your company's knowledge graph.</p>
+    <AuthLayout
+      title="Enterprise Brain"
+      subtitle="Sign in to access your company's knowledge graph."
+    >
+      <form onSubmit={handleSubmit} className="space-y-4 animate-reveal">
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
+        />
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
+        />
+        {error && <p className="text-caption-sm text-destructive bg-destructive-tint px-3 py-2 rounded-card">{error}</p>}
+        <Button type="submit" variant="primary" size="lg" disabled={loading} className="w-full">
+          {loading ? 'Signing in…' : 'Sign in'}
+        </Button>
+        <div className="text-center">
+          <AuthFooterLink to="/forgot-password">Forgot password?</AuthFooterLink>
         </div>
+      </form>
 
-        <form onSubmit={handleSubmit} className="space-y-4 animate-reveal" style={{ animationDelay: '0.05s' }}>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-            className="w-full px-4 py-2.5 border border-mist rounded-xl text-[14px] text-ink placeholder-stone focus:outline-none focus:border-graphite transition-colors"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-            className="w-full px-4 py-2.5 border border-mist rounded-xl text-[14px] text-ink placeholder-stone focus:outline-none focus:border-graphite transition-colors"
-          />
-          {error && <p className="text-[12px] text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-ink text-white rounded-xl text-[14px] font-medium hover:bg-graphite transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-          <div className="text-center">
-            <Link
-              to="/forgot-password"
-              className="text-[12px] text-stone hover:text-ink transition-colors"
-            >
-              Forgot password?
-            </Link>
+      {googleClientId && (
+        <div className="mt-6 animate-reveal">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-text-secondary/15" />
+            <span className="text-caption-sm uppercase tracking-section text-text-secondary">or</span>
+            <div className="flex-1 h-px bg-text-secondary/15" />
           </div>
-        </form>
+          <div id="penlo-google-btn" className="flex justify-center" />
+          {googleError && <p className="mt-3 text-caption-sm text-destructive">{googleError}</p>}
+        </div>
+      )}
 
-        {googleClientId && (
-          <div className="mt-6 animate-reveal" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-mist" />
-              <span className="text-[10px] uppercase tracking-[0.16em] text-stone">or</span>
-              <div className="flex-1 h-px bg-mist" />
-            </div>
-            <div id="penlo-google-btn" className="flex justify-center" />
-            {googleError && <p className="mt-3 text-[12px] text-ink">{googleError}</p>}
-          </div>
-        )}
-
-        <p className="mt-6 text-[12px] text-stone text-center animate-reveal" style={{ animationDelay: '0.15s' }}>
-          Don't have an account? Use an invite link.
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 text-caption text-text-secondary text-center">
+        Don&apos;t have an account? Use an invite link.
+      </p>
+    </AuthLayout>
   )
 }

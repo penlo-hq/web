@@ -3,15 +3,15 @@ import { computeDepth, DEPTH_BLUR, DEPTH_OPACITY, DEPTH_RADIUS_OFFSET } from '..
 import { NODE_RADIUS, type SimNode } from '../../lib/graph/simulation'
 
 const FILL: Record<NodeType, string> = {
-  company: '#0a0a0a',
-  team: '#0a0a0a',
+  company: '#171717',
+  team: '#171717',
   person: '#ffffff',
   client: '#fdf4e7',
   topic: '#fafafa',
   task: '#ffffff',
   event: '#ffffff',
   draft: '#ffffff',
-  agent: '#0a0a0a',
+  agent: '#171717',
   feature: '#eff6ff',
   decision: '#fefce8',
   alert: '#fef3c7',
@@ -20,7 +20,7 @@ const FILL: Record<NodeType, string> = {
 const STROKE: Record<NodeType, string> = {
   company: 'none',
   team: 'none',
-  person: '#0a0a0a',
+  person: '#171717',
   client: '#b45309',
   topic: '#6b6b6b',
   task: '#0a0a0a',

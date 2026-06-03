@@ -6,10 +6,10 @@ type Props = {
 
 export function StatCard({ label, value, sublabel }: Props) {
   return (
-    <dl className="px-4 py-3 rounded-xl border border-mist bg-white">
-      <dt className="text-[10px] uppercase tracking-[0.16em] text-stone">{label}</dt>
-      <dd className="mt-1 font-display font-bold text-[24px] tracking-tightest text-ink leading-none">{value}</dd>
-      {sublabel && <dd className="mt-1 text-[10.5px] text-stone">{sublabel}</dd>}
+    <dl className="px-5 py-4 rounded-card bg-surface hairline-border shadow-card">
+      <dt className="text-caption-sm uppercase tracking-section text-text-secondary">{label}</dt>
+      <dd className="mt-1 font-display font-semibold text-[24px] text-text-primary leading-none">{value}</dd>
+      {sublabel && <dd className="mt-1 text-caption-sm text-text-secondary">{sublabel}</dd>}
     </dl>
   )
 }

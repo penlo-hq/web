@@ -10,6 +10,7 @@ export type NodeType =
   | 'agent'
   | 'feature'
   | 'decision'
+  | 'architecture'
   | 'alert'
 
 export type EdgeKind =
@@ -152,9 +153,10 @@ export const NODE_TYPE_LABEL: Record<NodeType, string> = {
   agent: 'Agent',
   feature: 'Feature',
   decision: 'Decision',
+  architecture: 'Architecture',
   alert: 'Alert',
 }
 
 export const NODE_TYPE_ORDER: NodeType[] = [
-  'person', 'client', 'topic', 'task', 'event', 'draft', 'agent', 'feature', 'decision', 'alert',
+  'person', 'client', 'topic', 'task', 'event', 'draft', 'agent', 'feature', 'decision', 'architecture', 'alert',
 ]

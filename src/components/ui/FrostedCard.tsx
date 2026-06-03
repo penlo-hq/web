@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react'
+import { Card } from './Card'
 
 type Props = { children: ReactNode; className?: string }
 
+/** @deprecated Use Card with frosted prop instead */
 export function FrostedCard({ children, className = '' }: Props) {
   return (
-    <div className={`rounded-2xl border border-mist bg-white/95 backdrop-blur-sm shadow-[0_1px_24px_-8px_rgba(0,0,0,0.1)] ${className}`}>
+    <Card frosted padding="lg" className={className}>
       {children}
-    </div>
+    </Card>
   )
 }

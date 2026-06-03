@@ -4,11 +4,12 @@ import { Navigate } from 'react-router-dom'
 import { TopBar } from '../components/layout/TopBar'
 import { useAuthStore } from '../store/authStore'
 import { linearApi, type LinearStatusDTO } from '../lib/api/endpoints'
+import type { PageProps } from '../types/layout'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 const WEBHOOK_URL = `${API_BASE}/api/v1/linear/webhook`
 
-export function LinearSettings() {
+export function LinearSettings({ onMenuClick }: PageProps) {
   const user = useAuthStore((s) => s.user)
 
   const [status, setStatus] = useState<LinearStatusDTO | null>(null)
@@ -83,30 +84,30 @@ export function LinearSettings() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen">
-      <TopBar title="Linear" subtitle="Manage integration" />
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
+      <TopBar onMenuClick={onMenuClick} title="Linear" subtitle="Manage integration" />
+      <div className="flex-1 overflow-y-auto px-5 py-6">
         <div className="max-w-2xl space-y-4">
           {justConnected && (
-            <div className="px-4 py-3 rounded-xl border border-mist bg-paper text-[12.5px] text-graphite">
+            <div className="px-4 py-3 rounded-xl border border-text-secondary/10 bg-surface text-[12.5px] text-text-secondary">
               Linear workspace connected.
             </div>
           )}
 
-          {loading && <p className="text-[13px] text-stone">Loading…</p>}
+          {loading && <p className="text-[13px] text-text-secondary">Loading…</p>}
 
-          {!loading && error && <p className="text-[13px] text-ink">{error}</p>}
+          {!loading && error && <p className="text-[13px] text-text-primary">{error}</p>}
 
           {!loading && !status?.connected && (
-            <div className="px-6 py-6 rounded-xl border border-mist bg-paper">
-              <p className="text-[13px] text-graphite">Connect Linear to feed the brain from issues.</p>
-              <p className="text-[12px] text-stone mt-1">
+            <div className="px-6 py-6 rounded-xl border border-text-secondary/10 bg-surface">
+              <p className="text-[13px] text-text-secondary">Connect Linear to feed the brain from issues.</p>
+              <p className="text-[12px] text-text-secondary mt-1">
                 New and updated issues become feature/task nodes, with assignees and projects linked in.
               </p>
 
               <div className="mt-5 space-y-3">
                 <div>
-                  <label htmlFor="linear-token" className="block text-[10.5px] uppercase tracking-[0.16em] text-stone mb-1">
+                  <label htmlFor="linear-token" className="block text-[10.5px] uppercase tracking-[0.16em] text-text-secondary mb-1">
                     Linear API token
                   </label>
                   <input
@@ -119,11 +120,11 @@ export function LinearSettings() {
                       if (e.key === 'Enter') connect()
                     }}
                     placeholder="lin_api_***************************"
-                    className="w-full px-3 py-2 rounded-xl border border-mist bg-white text-[12.5px] text-ink outline-none focus:border-ink transition-colors"
+                    className="w-full px-3 py-2 rounded-xl border border-text-secondary/10 bg-white text-[12.5px] text-text-primary outline-none focus:border-ink transition-colors"
                   />
                 </div>
                 <div>
-                  <label htmlFor="linear-secret" className="block text-[10.5px] uppercase tracking-[0.16em] text-stone mb-1">
+                  <label htmlFor="linear-secret" className="block text-[10.5px] uppercase tracking-[0.16em] text-text-secondary mb-1">
                     Webhook signing secret
                   </label>
                   <input
@@ -136,37 +137,37 @@ export function LinearSettings() {
                       if (e.key === 'Enter') connect()
                     }}
                     placeholder="The signing secret from your Linear webhook"
-                    className="w-full px-3 py-2 rounded-xl border border-mist bg-white text-[12.5px] text-ink outline-none focus:border-ink transition-colors"
+                    className="w-full px-3 py-2 rounded-xl border border-text-secondary/10 bg-white text-[12.5px] text-text-primary outline-none focus:border-ink transition-colors"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={connect}
                   disabled={!token.trim() || !secret.trim() || submitting}
-                  className="px-4 py-2 rounded-xl bg-ink text-white text-[12px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl bg-accent text-white text-[12px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity disabled:opacity-40"
                 >
                   {submitting ? 'Connecting…' : 'Connect'}
                 </button>
               </div>
 
-              <p className="mt-4 text-[11px] text-stone">
+              <p className="mt-4 text-[11px] text-text-secondary">
                 Create a token at linear.app → Settings → API → Personal API keys (read access). Add a webhook
-                pointing at the URL below, subscribed to <span className="text-ink">Issues</span> events, and paste its
+                pointing at the URL below, subscribed to <span className="text-text-primary">Issues</span> events, and paste its
                 signing secret here.
               </p>
-              <div className="mt-2 px-3 py-2 rounded-xl border border-mist bg-white">
-                <code className="text-[11.5px] text-ink break-all">{WEBHOOK_URL}</code>
+              <div className="mt-2 px-3 py-2 rounded-xl border border-text-secondary/10 bg-white">
+                <code className="text-[11.5px] text-text-primary break-all">{WEBHOOK_URL}</code>
               </div>
             </div>
           )}
 
           {!loading && status?.connected && (
-            <section className="px-5 py-4 rounded-xl border border-mist bg-white">
+            <section className="px-5 py-4 rounded-xl border border-text-secondary/10 bg-white">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[13.5px] font-medium text-ink">{status.org_name ?? status.org_id}</p>
+                  <p className="text-[13.5px] font-medium text-text-primary">{status.org_name ?? status.org_id}</p>
                   {status.connected_at && (
-                    <p className="text-[10.5px] text-stone mt-0.5">
+                    <p className="text-[10.5px] text-text-secondary mt-0.5">
                       Connected {new Date(status.connected_at).toLocaleString()}
                     </p>
                   )}
@@ -174,23 +175,23 @@ export function LinearSettings() {
                 <button
                   type="button"
                   onClick={disconnect}
-                  className="text-[10.5px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+                  className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
                 >
                   Disconnect
                 </button>
               </div>
 
               <div className="mt-4">
-                <p className="text-[10.5px] uppercase tracking-[0.16em] text-stone mb-2">Webhook URL</p>
-                <div className="px-3 py-2 rounded-xl border border-mist bg-paper">
-                  <code className="text-[11.5px] text-ink break-all">{WEBHOOK_URL}</code>
+                <p className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary mb-2">Webhook URL</p>
+                <div className="px-3 py-2 rounded-xl border border-text-secondary/10 bg-surface">
+                  <code className="text-[11.5px] text-text-primary break-all">{WEBHOOK_URL}</code>
                 </div>
-                <p className="mt-2 text-[10.5px] text-stone">
+                <p className="mt-2 text-[10.5px] text-text-secondary">
                   Paste this into Linear → Settings → API → Webhooks and subscribe to Issues events only.
                 </p>
               </div>
 
-              <p className="mt-4 text-[10.5px] text-stone">Issues feeding the brain: all projects.</p>
+              <p className="mt-4 text-[10.5px] text-text-secondary">Issues feeding the brain: all projects.</p>
             </section>
           )}
         </div>

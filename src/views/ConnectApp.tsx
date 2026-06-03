@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Copy, Check } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { apiKeysApi, type ApiKeyEntry } from '../lib/api/endpoints'
+import type { PageProps } from '../types/layout'
+import { Button, Card, Input, SettingsSection } from '../components/ui'
 
 const ENDPOINT_URL = `${import.meta.env.VITE_API_URL ?? ''}/api/v1/ingest/penlo-brain`
 
-export function ConnectApp() {
+export function ConnectApp({ onMenuClick }: PageProps) {
   const [keys, setKeys] = useState<ApiKeyEntry[]>([])
   const [newKey, setNewKey] = useState<string | null>(null)
   const [label, setLabel] = useState('Penlo App')
@@ -55,125 +58,91 @@ export function ConnectApp() {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col h-screen"
+      className="flex flex-col h-screen bg-canvas"
     >
-      <TopBar title="Connect Penlo App" subtitle="Link your iOS device to the Enterprise Brain" />
+      <TopBar title="Connect App" subtitle="Link your iOS device to Enterprise Brain" onMenuClick={onMenuClick} />
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-
-        {/* Step 1 — Endpoint URL */}
-        <Section step="1" title="Copy your endpoint URL">
-          <p className="text-[13px] text-stone mb-3">
-            Enter this URL in the Penlo iOS app under <span className="font-mono text-[12px] text-ink">Settings → Enterprise → Endpoint URL</span>.
+      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6 max-w-4xl">
+        <SettingsSection title="Endpoint URL" description="Copy this URL into the Penlo iOS app under Settings → Enterprise Brain.">
+          <p className="text-caption text-text-secondary mb-3">
+            For the Chrome meeting-capture extension, use the brain <strong>base URL</strong> only — it posts to{' '}
+            <span className="font-mono text-caption-sm">/api/v1/ingest/standup</span>.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 px-3 py-2 bg-paper border border-mist rounded-lg text-[12px] font-mono text-graphite break-all">
+            <code className="flex-1 px-3 py-2 bg-surface hairline-border rounded-card text-caption-sm font-mono text-text-secondary break-all">
               {ENDPOINT_URL}
             </code>
-            <button
-              onClick={() => copy(ENDPOINT_URL, 'url')}
-              className="shrink-0 px-3 py-2 border border-mist rounded-lg text-[12px] text-stone hover:text-ink hover:border-graphite transition-colors"
-            >
+            <Button variant="secondary" size="sm" onClick={() => copy(ENDPOINT_URL, 'url')}>
+              {copied === 'url' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               {copied === 'url' ? 'Copied' : 'Copy'}
-            </button>
+            </Button>
           </div>
-        </Section>
+        </SettingsSection>
 
-        {/* Step 2 — Generate API key */}
-        <Section step="2" title="Generate an API key">
-          <p className="text-[13px] text-stone mb-3">
-            Generate a key and enter it in <span className="font-mono text-[12px] text-ink">Settings → Enterprise → API Key</span>.
-            The key is shown only once — copy it before closing.
-          </p>
-
+        <SettingsSection title="API Key" description="Generate a key for Settings → Enterprise → API Key in the iOS app.">
           {newKey && (
-            <div className="mb-4 p-4 border border-mist rounded-xl bg-paper animate-reveal">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-stone mb-2">Your new API key</p>
+            <Card padding="md" className="bg-accent-tint border-accent-border mb-4 animate-reveal">
+              <p className="text-caption-sm uppercase tracking-section text-accent mb-2">Your new API key</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 px-3 py-2 bg-white border border-mist rounded-lg text-[12px] font-mono text-ink break-all">
+                <code className="flex-1 px-3 py-2 bg-canvas hairline-border rounded-card text-caption-sm font-mono text-text-primary break-all">
                   {newKey}
                 </code>
-                <button
-                  onClick={() => copy(newKey, 'key')}
-                  className="shrink-0 px-3 py-2 bg-ink text-white rounded-lg text-[12px] hover:bg-graphite transition-colors"
-                >
+                <Button variant="primary" size="sm" onClick={() => copy(newKey, 'key')}>
                   {copied === 'key' ? 'Copied' : 'Copy'}
-                </button>
+                </Button>
               </div>
-              <p className="mt-2 text-[11px] text-stone">This key will not be shown again.</p>
-            </div>
+              <p className="mt-2 text-caption-sm text-text-secondary">This key will not be shown again.</p>
+            </Card>
           )}
-
-          <div className="flex items-center gap-3">
-            <input
+          <div className="flex items-end gap-3 flex-wrap">
+            <Input
+              label="Key label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Key label"
-              className="px-3 py-2 border border-mist rounded-lg text-[13px] text-ink placeholder-stone focus:outline-none focus:border-graphite transition-colors w-48"
+              placeholder="Penlo App"
+              className="w-48"
             />
-            <button
-              onClick={handleCreate}
-              disabled={creating}
-              className="px-4 py-2 bg-ink text-white rounded-lg text-[13px] font-medium hover:bg-graphite transition-colors disabled:opacity-50"
-            >
+            <Button variant="primary" onClick={handleCreate} disabled={creating}>
               {creating ? 'Generating…' : 'Generate key'}
-            </button>
+            </Button>
           </div>
-          {error && <p className="mt-2 text-[12px] text-red-600">{error}</p>}
-        </Section>
+          {error && <p className="mt-2 text-caption-sm text-destructive">{error}</p>}
+        </SettingsSection>
 
-        {/* Step 3 — Active keys */}
-        <Section step="3" title="Active API keys">
+        <SettingsSection title="Active keys">
           {keys.length === 0 ? (
-            <p className="text-[13px] text-stone">No keys yet. Generate one above.</p>
+            <p className="text-caption text-text-secondary">No keys yet. Generate one above.</p>
           ) : (
             <div className="space-y-2">
               {keys.map((k) => (
-                <div key={k.id} className="flex items-center justify-between px-4 py-3 border border-mist rounded-xl">
+                <div key={k.id} className="flex items-center justify-between px-4 py-3 bg-surface hairline-border rounded-card">
                   <div>
-                    <p className="text-[13px] text-ink font-medium">{k.label}</p>
-                    <p className="text-[11px] font-mono text-stone mt-0.5">{k.key_prefix}…</p>
-                    <p className="text-[11px] text-stone mt-0.5">
+                    <p className="text-body font-medium text-text-primary">{k.label}</p>
+                    <p className="text-caption-sm font-mono text-text-secondary mt-0.5">{k.key_prefix}…</p>
+                    <p className="text-caption-sm text-text-secondary mt-0.5">
                       Created {new Date(k.created_at).toLocaleDateString()}
                       {k.last_used_at && ` · Last used ${new Date(k.last_used_at).toLocaleDateString()}`}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleRevoke(k.id)}
-                    className="text-[12px] text-stone hover:text-red-600 transition-colors"
-                  >
+                  <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive-tint" onClick={() => handleRevoke(k.id)}>
                     Revoke
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
           )}
-        </Section>
+        </SettingsSection>
 
-        {/* Step 4 — How it works */}
-        <Section step="4" title="How it works">
-          <ul className="space-y-2 text-[13px] text-stone">
-            <li>The Penlo pen captures ambient speech and transcribes it on-device.</li>
+        <SettingsSection title="How it works">
+          <ul className="space-y-2 text-caption text-text-secondary list-disc pl-4">
+            <li>The Penlo app captures ambient speech and transcribes it on-device.</li>
             <li>Claude extracts structured facts — who said what, about whom, with what context.</li>
-            <li>When you tap <span className="font-mono text-[12px] text-ink">Sync to Enterprise Brain</span> in the app, those facts are pushed here as structured knowledge.</li>
-            <li>The Enterprise Brain creates nodes for people, topics, and decisions, and builds edges between related entities.</li>
-            <li>Every team member's sync feeds the same shared graph — no context is lost across conversations.</li>
+            <li>When you sync to Enterprise Brain, those facts become structured knowledge.</li>
+            <li>The Brain creates nodes for people, topics, and decisions with edges between related entities.</li>
+            <li>Every team member&apos;s sync feeds the same shared graph.</li>
           </ul>
-        </Section>
-
+        </SettingsSection>
       </div>
     </motion.div>
-  )
-}
-
-function Section({ step, title, children }: { step: string; title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-mist bg-white p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="w-6 h-6 rounded-full bg-ink text-white text-[11px] font-bold flex items-center justify-center shrink-0">{step}</span>
-        <h2 className="text-[14px] font-semibold text-ink">{title}</h2>
-      </div>
-      {children}
-    </div>
   )
 }

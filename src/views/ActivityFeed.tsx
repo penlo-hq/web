@@ -4,6 +4,7 @@ import { TopBar } from '../components/layout/TopBar'
 import { ActivityCard } from '../components/activity/ActivityCard'
 import { activityApi } from '../lib/api/endpoints'
 import { useActivityStore } from '../store/activityStore'
+import type { PageProps } from '../types/layout'
 
 const SOURCE_FILTERS: { value: string; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -13,16 +14,21 @@ const SOURCE_FILTERS: { value: string; label: string }[] = [
   { value: 'crm', label: 'CRM' },
 ]
 
-export function ActivityFeed() {
+export function ActivityFeed({ onMenuClick }: PageProps) {
   const events = useActivityStore((s) => s.events)
   const hasMore = useActivityStore((s) => s.hasMore)
   const nextCursor = useActivityStore((s) => s.nextCursor)
   const setInitial = useActivityStore((s) => s.setInitial)
   const appendOlder = useActivityStore((s) => s.appendOlder)
+  const clearUnread = useActivityStore((s) => s.clearUnread)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loadingMore, setLoadingMore] = useState(false)
   const [filter, setFilter] = useState<string>('all')
+
+  useEffect(() => {
+    clearUnread()
+  }, [clearUnread])
 
   useEffect(() => {
     let cancelled = false
@@ -62,9 +68,9 @@ export function ActivityFeed() {
   const visible = filter === 'all' ? events : events.filter((e) => e.source === filter)
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen">
-      <TopBar title="Activity" subtitle="What the brain just learned" />
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
+      <TopBar onMenuClick={onMenuClick} title="Activity" subtitle="What the brain just learned" />
+      <div className="flex-1 overflow-y-auto px-5 py-6">
         <div className="flex gap-1.5 mb-5 max-w-2xl">
           {SOURCE_FILTERS.map((f) => (
             <button
@@ -73,8 +79,8 @@ export function ActivityFeed() {
               onClick={() => setFilter(f.value)}
               className={`px-3 py-1 rounded-full text-[11px] uppercase tracking-[0.16em] transition-colors ${
                 filter === f.value
-                  ? 'bg-ink text-white'
-                  : 'border border-mist text-stone hover:border-graphite hover:text-ink'
+                  ? 'bg-accent text-white'
+                  : 'border border-text-secondary/10 text-text-secondary hover:border-accent/30 hover:text-text-primary'
               }`}
             >
               {f.label}
@@ -85,17 +91,17 @@ export function ActivityFeed() {
         {loading && (
           <div className="space-y-2 max-w-2xl">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-20 rounded-xl border border-mist bg-paper animate-pulse" />
+              <div key={i} className="h-20 rounded-xl border border-text-secondary/10 bg-surface animate-pulse" />
             ))}
           </div>
         )}
 
         {!loading && error && (
           <div className="max-w-2xl">
-            <p className="text-[13px] text-stone">{error}</p>
+            <p className="text-[13px] text-text-secondary">{error}</p>
             <button
               type="button"
-              className="mt-2 text-[11px] uppercase tracking-[0.16em] text-ink hover:opacity-70"
+              className="mt-2 text-[11px] uppercase tracking-[0.16em] text-text-primary hover:opacity-70"
               onClick={() => window.location.reload()}
             >
               Retry
@@ -104,11 +110,11 @@ export function ActivityFeed() {
         )}
 
         {!loading && !error && visible.length === 0 && (
-          <div className="max-w-md mx-auto mt-12 px-6 py-8 rounded-xl border border-mist bg-paper text-center">
-            <p className="text-[13px] text-graphite">
+          <div className="max-w-md mx-auto mt-12 px-6 py-8 rounded-xl border border-text-secondary/10 bg-surface text-center">
+            <p className="text-[13px] text-text-secondary">
               Nothing has flowed into the brain in the last 24 hours.
             </p>
-            <p className="text-[12px] text-stone mt-2">
+            <p className="text-[12px] text-text-secondary mt-2">
               Connect Slack or run a sync from your Penlo device to get started.
             </p>
           </div>
@@ -125,7 +131,7 @@ export function ActivityFeed() {
                   type="button"
                   disabled={loadingMore}
                   onClick={loadOlder}
-                  className="text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors disabled:opacity-50"
+                  className="text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading…' : 'Load older'}
                 </button>

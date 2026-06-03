@@ -1,11 +1,11 @@
 type Variant = 'pending' | 'running' | 'completed' | 'failed' | 'default'
 
 const STYLES: Record<Variant, string> = {
-  pending: 'bg-paper text-stone border-mist',
-  running: 'bg-ink text-white border-ink',
-  completed: 'bg-paper text-graphite border-mist',
+  pending: 'bg-surface text-text-secondary border-text-secondary/10',
+  running: 'bg-accent text-white border-accent',
+  completed: 'bg-surface text-text-secondary border-text-secondary/10',
   failed: 'bg-red-50 text-red-700 border-red-200',
-  default: 'bg-paper text-stone border-mist',
+  default: 'bg-surface text-text-secondary border-text-secondary/10',
 }
 
 type Props = { label: string; variant?: Variant }

@@ -15,16 +15,20 @@ type ActivityState = {
   events: ActivityEvent[]
   hasMore: boolean
   nextCursor: string | null
+  unreadCount: number
   setInitial: (events: ActivityEvent[], hasMore: boolean, cursor: string | null) => void
   prependLive: (event: ActivityEvent) => void
   appendOlder: (events: ActivityEvent[], hasMore: boolean, cursor: string | null) => void
   reset: () => void
+  incrementUnread: () => void
+  clearUnread: () => void
 }
 
 export const useActivityStore = create<ActivityState>((set) => ({
   events: [],
   hasMore: false,
   nextCursor: null,
+  unreadCount: 0,
 
   setInitial: (events, hasMore, cursor) => set({ events, hasMore, nextCursor: cursor }),
 
@@ -41,5 +45,8 @@ export const useActivityStore = create<ActivityState>((set) => ({
       return { events: merged, hasMore, nextCursor: cursor }
     }),
 
-  reset: () => set({ events: [], hasMore: false, nextCursor: null }),
+  reset: () => set({ events: [], hasMore: false, nextCursor: null, unreadCount: 0 }),
+
+  incrementUnread: () => set((s) => ({ unreadCount: s.unreadCount + 1 })),
+  clearUnread: () => set({ unreadCount: 0 }),
 }))

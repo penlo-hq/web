@@ -4,19 +4,37 @@
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
-  html { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-  body { background: #ffffff; color: #0a0a0a; margin: 0; }
-  ::selection { background: #0a0a0a; color: #ffffff; }
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: #ffffff;
+    color: #171717;
+    margin: 0;
+  }
+  ::selection {
+    background: #0053D6;
+    color: #ffffff;
+  }
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #e6e6e6; border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: #6b6b6b; }
+  ::-webkit-scrollbar-thumb { background: rgba(23, 23, 23, 0.12); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #6E6E73; }
+}
+
+@layer components {
+  .hairline-border {
+    border: 0.5px solid rgba(23, 23, 23, 0.08);
+  }
+  .frosted-pill {
+    @apply backdrop-blur-xl bg-white/70 border border-black/[0.06];
+  }
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-1;
+  }
 }
 
 @layer utilities {
   .animate-reveal { animation: reveal 0.4s ease both; }
-  @keyframes reveal {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
 }

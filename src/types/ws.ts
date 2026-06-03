@@ -1,4 +1,5 @@
 import type { GraphNode, GraphEdge } from './graph'
+import type { NotificationDTO } from './notification'
 
 export type WSMessage =
   | { type: 'node_added'; payload: GraphNode }
@@ -22,5 +23,6 @@ export type WSMessage =
   | { type: 'dispatch_building'; payload: { dispatch_id: string } }
   | { type: 'dispatch_complete'; payload: { dispatch_id: string; pr_url: string } }
   | { type: 'dispatch_failed'; payload: { dispatch_id: string; error: string } }
+  | { type: 'notification'; payload: NotificationDTO }
   | { type: 'ping' }
   | { type: 'pong' }

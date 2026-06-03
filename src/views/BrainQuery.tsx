@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { ArrowUpCircle, Sparkles, ThumbsDown, ThumbsUp } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { queryApi } from '../lib/api/endpoints'
 import { useGraphStore } from '../store/graphStore'
 import type { Citation, Contradiction, QueryResult } from '../types/graph'
 import { NODE_TYPE_LABEL } from '../types/graph'
+import { LiquidOrb, Spinner } from '../components/ui'
 
 type Scope = 'company' | 'me'
 
@@ -29,7 +31,11 @@ function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
-export function BrainQuery() {
+import type { PageProps } from '../types/layout'
+
+type Props = PageProps
+
+export function BrainQuery({ onMenuClick }: Props) {
   const navigate = useNavigate()
   const setSelected = useGraphStore((s) => s.setSelected)
   const [scope, setScope] = useState<Scope>('company')
@@ -76,7 +82,7 @@ export function BrainQuery() {
             id: uid(),
             role: 'brain-error',
             at: Date.now(),
-            text: "Brain · I couldn't find enough to answer that.",
+            text: "I couldn't find enough to answer that.",
           }),
       )
     } finally {
@@ -103,68 +109,62 @@ export function BrainQuery() {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col h-screen"
+      className="flex flex-col h-screen bg-canvas"
     >
-      <TopBar title="Ask Your Brain" subtitle="Query in plain English" />
+      <TopBar title="Ask Brain" subtitle="Query in plain English" onMenuClick={onMenuClick} />
 
-      <div className="flex items-center justify-end gap-2 px-8 pt-3">
-        <label className="text-[10px] uppercase tracking-[0.18em] text-stone" htmlFor="scope-select">
+      <div className="flex items-center justify-end gap-2 px-5 pt-3">
+        <label className="text-caption-sm uppercase tracking-section text-text-secondary" htmlFor="scope-select">
           Scope
         </label>
         <select
           id="scope-select"
           value={scope}
           onChange={(e) => setScope(e.target.value as Scope)}
-          className="text-[12px] px-2 py-1 border border-mist rounded-md bg-white text-ink"
+          className="text-caption px-3 py-1.5 hairline-border rounded-xl bg-canvas text-text-primary focus-ring"
         >
           <option value="company">Company</option>
           <option value="me">My graph</option>
         </select>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-8 py-6 space-y-6"
-      >
-        {messages.length === 0 && <EmptyState />}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-5">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center pt-16 text-center">
+            <LiquidOrb size={100} className="mb-6" />
+            <p className="text-body text-text-secondary mb-2">
+              Try: <span className="italic text-text-primary">&quot;Who&apos;s blocked on the auth migration?&quot;</span>
+            </p>
+          </div>
+        )}
         {messages.map((m) => (
           <MessageRow key={m.id} message={m} onCitationClick={onCitationClick} />
         ))}
       </div>
 
-      <div className="border-t border-mist px-8 py-4 bg-white">
-        <div className="flex gap-2 items-end">
+      <div className="px-5 py-4 bg-canvas">
+        <div className="frosted-pill rounded-full flex gap-2 items-end px-4 py-2 max-w-3xl mx-auto">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Ask anything about your company…"
+            placeholder="Ask Penlo…"
             aria-label="Ask a question about your company brain"
             rows={1}
             disabled={pending}
-            className="flex-1 resize-none px-3 py-2 text-[13px] border border-mist rounded-lg bg-white text-ink placeholder-stone focus:outline-none focus:border-graphite transition-colors disabled:bg-paper"
+            className="flex-1 resize-none bg-transparent text-body text-text-primary placeholder:text-text-secondary/60 focus:outline-none min-h-[24px] max-h-32 py-1"
           />
           <button
             onClick={send}
             disabled={pending || !input.trim()}
-            className="px-4 py-2 text-[12px] uppercase tracking-[0.16em] bg-ink text-white rounded-lg disabled:bg-mist disabled:text-stone transition-colors"
+            className="shrink-0 text-accent disabled:text-text-secondary/30 transition-colors focus-ring rounded-full"
+            aria-label="Send"
           >
-            Send
+            <ArrowUpCircle className="w-7 h-7" strokeWidth={1.5} />
           </button>
         </div>
       </div>
     </motion.div>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center text-stone pt-24">
-      <div className="text-[11px] uppercase tracking-[0.22em] mb-3">Ask Your Brain</div>
-      <div className="text-[13px] text-graphite">
-        Try: <span className="italic">"Who's blocked on the auth migration?"</span>
-      </div>
-    </div>
   )
 }
 
@@ -177,62 +177,62 @@ function MessageRow({
 }) {
   if (message.role === 'user') {
     return (
-      <div className="flex flex-col items-end">
-        <div className="text-[9.5px] uppercase tracking-[0.2em] text-stone mb-1">You</div>
-        <div className="max-w-[640px] px-4 py-2.5 rounded-2xl bg-ink text-white text-[13px] leading-relaxed">
+      <div className="flex justify-end">
+        <div className="max-w-[640px] px-4 py-2.5 rounded-bubble bg-accent text-white text-body leading-relaxed rounded-br-md">
           {message.text}
         </div>
       </div>
     )
   }
+
   if (message.role === 'brain-loading') {
     return (
-      <div className="flex flex-col items-start">
-        <div className="text-[9.5px] uppercase tracking-[0.2em] text-stone mb-1">Brain</div>
-        <div className="px-4 py-2.5 rounded-2xl bg-paper text-graphite text-[13px]">
-          <span className="inline-flex items-center gap-1">
-            synthesizing
-            <span className="animate-pulse">…</span>
-          </span>
+      <div className="flex items-start gap-2 max-w-[720px]">
+        <Sparkles className="w-4 h-4 text-accent mt-1 shrink-0" />
+        <div className="flex items-center gap-2 text-body text-text-secondary">
+          <Spinner size="sm" />
+          Synthesizing…
         </div>
       </div>
     )
   }
+
   if (message.role === 'brain-error') {
     return (
-      <div className="flex flex-col items-start">
-        <div className="text-[9.5px] uppercase tracking-[0.2em] text-stone mb-1">Brain</div>
-        <div className="px-4 py-2.5 rounded-2xl bg-paper text-graphite text-[13px]">{message.text}</div>
+      <div className="flex items-start gap-2 max-w-[720px]">
+        <Sparkles className="w-4 h-4 text-accent mt-1 shrink-0" />
+        <p className="text-body text-text-secondary">{message.text}</p>
       </div>
     )
   }
+
   return (
-    <div className="flex flex-col items-start">
-      <div className="text-[9.5px] uppercase tracking-[0.2em] text-stone mb-1">
-        Brain
+    <div className="flex items-start gap-2 max-w-[720px] w-full">
+      <Sparkles className="w-4 h-4 text-accent mt-1 shrink-0" />
+      <div className="flex-1 min-w-0">
         {message.subAgent && (
-          <span className="ml-2 text-stone normal-case tracking-normal">· {message.subAgent} agent</span>
+          <div className="text-caption-sm text-text-secondary mb-1">{message.subAgent} agent</div>
         )}
-      </div>
-      <div className="max-w-[720px] w-full px-4 py-3 rounded-2xl bg-paper text-ink text-[13px] leading-relaxed whitespace-pre-wrap">
-        {renderAnswerWithCitations(message.answer, message.citations, onCitationClick)}
+        <div className="text-body text-text-primary leading-relaxed whitespace-pre-wrap">
+          {renderAnswerWithCitations(message.answer, message.citations, onCitationClick)}
+        </div>
 
         {message.citations.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-mist">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-stone mb-2">Sources</div>
+          <div className="mt-4 pt-3 border-t border-text-secondary/15">
+            <div className="text-caption-sm uppercase tracking-section text-text-secondary mb-2">Sources</div>
             <div className="flex flex-wrap gap-2">
               {message.citations.map((c) => (
                 <button
                   key={c.node_id}
                   onClick={() => onCitationClick(c.node_id)}
                   aria-label={`Open ${c.label} (${NODE_TYPE_LABEL[c.type]})`}
-                  className="flex flex-col items-start px-3 py-2 border border-mist rounded-lg bg-white text-left hover:border-graphite transition-colors max-w-[220px]"
+                  className="flex flex-col items-start px-3 py-2 hairline-border rounded-card bg-surface text-left hover:bg-black/[0.03] transition-colors max-w-[220px] focus-ring"
                 >
-                  <span className="text-[9.5px] uppercase tracking-[0.18em] text-stone">
+                  <span className="text-caption-sm uppercase tracking-section text-text-secondary">
                     {NODE_TYPE_LABEL[c.type] ?? c.type}
                   </span>
-                  <span className="text-[12.5px] font-medium text-ink truncate w-full">{c.label}</span>
-                  <span className="text-[11px] text-stone truncate w-full">{c.contribution}</span>
+                  <span className="text-caption font-medium text-text-primary truncate w-full">{c.label}</span>
+                  <span className="text-caption-sm text-text-secondary truncate w-full">{c.contribution}</span>
                 </button>
               ))}
             </div>
@@ -240,7 +240,7 @@ function MessageRow({
         )}
 
         {message.contradictions.length > 0 && (
-          <div className="mt-4 px-3 py-2 rounded-lg border border-amber-300 bg-amber-50 text-[12px] text-amber-900">
+          <div className="mt-4 px-3 py-2 rounded-card border border-amber-300/60 bg-amber-brain-bg text-caption text-amber-brain">
             <span className="font-semibold">Contradiction detected:</span>{' '}
             {message.contradictions.length} source
             {message.contradictions.length === 1 ? '' : 's'} disagree.
@@ -249,7 +249,7 @@ function MessageRow({
                 <button
                   key={i}
                   onClick={() => onCitationClick(c.node_a_id)}
-                  className="underline underline-offset-2 hover:text-amber-700"
+                  className="underline underline-offset-2 hover:text-amber-brain focus-ring"
                 >
                   View {i + 1}
                 </button>
@@ -282,27 +282,31 @@ function QueryFeedbackRow({ queryId, question, answer }: { queryId: string; ques
   }
 
   return (
-    <div className="mt-3 flex items-center gap-2 pt-2 border-t border-mist">
-      <span className="text-[10px] text-stone uppercase tracking-wider">Helpful?</span>
+    <div className="mt-3 flex items-center gap-2 pt-2 border-t border-text-secondary/15">
+      <span className="text-caption-sm text-text-secondary">Helpful?</span>
       <button
         type="button"
         onClick={() => submit('up')}
         disabled={sent !== null}
-        className={`text-sm px-2 py-0.5 rounded ${sent === 'up' ? 'bg-green-100' : 'hover:bg-paper'}`}
+        className={`p-1.5 rounded-lg transition-colors focus-ring ${
+          sent === 'up' ? 'bg-green-50 text-green-600' : 'hover:bg-surface text-text-secondary'
+        }`}
         aria-label="Thumbs up"
       >
-        👍
+        <ThumbsUp className="w-4 h-4" />
       </button>
       <button
         type="button"
         onClick={() => submit('down')}
         disabled={sent !== null}
-        className={`text-sm px-2 py-0.5 rounded ${sent === 'down' ? 'bg-red-100' : 'hover:bg-paper'}`}
+        className={`p-1.5 rounded-lg transition-colors focus-ring ${
+          sent === 'down' ? 'bg-destructive-tint text-destructive' : 'hover:bg-surface text-text-secondary'
+        }`}
         aria-label="Thumbs down"
       >
-        👎
+        <ThumbsDown className="w-4 h-4" />
       </button>
-      {sent && <span className="text-[10px] text-stone">Thanks for the feedback</span>}
+      {sent && <span className="text-caption-sm text-text-secondary">Thanks</span>}
     </div>
   )
 }
@@ -331,7 +335,7 @@ function renderAnswerWithCitations(
       <button
         key={i}
         onClick={() => onCitationClick(p.id)}
-        className="inline-flex items-baseline mx-0.5 px-1 py-0.5 rounded text-[11px] text-ink bg-white border border-mist hover:border-graphite transition-colors"
+        className="inline-flex items-baseline mx-0.5 px-1.5 py-0.5 rounded-full text-caption-sm text-accent bg-accent-tint hover:bg-accent/15 transition-colors focus-ring"
       >
         cite
       </button>

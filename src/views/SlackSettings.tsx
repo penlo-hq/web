@@ -4,10 +4,11 @@ import { Navigate, useSearchParams } from 'react-router-dom'
 import { TopBar } from '../components/layout/TopBar'
 import { useAuthStore } from '../store/authStore'
 import { slackApi, type SlackChannelDTO, type SlackWorkspaceDTO } from '../lib/api/endpoints'
+import type { PageProps } from '../types/layout'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
-export function SlackSettings() {
+export function SlackSettings({ onMenuClick }: PageProps) {
   const user = useAuthStore((s) => s.user)
   const [params] = useSearchParams()
   const status = params.get('status')
@@ -84,37 +85,37 @@ export function SlackSettings() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen">
-      <TopBar title="Slack" subtitle="Manage integration" />
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-screen bg-canvas">
+      <TopBar onMenuClick={onMenuClick} title="Slack" subtitle="Manage integration" />
+      <div className="flex-1 overflow-y-auto px-5 py-6">
         <div className="max-w-2xl space-y-4">
           {status === 'ok' && (
-            <div className="px-4 py-3 rounded-xl border border-mist bg-paper text-[12.5px] text-graphite">
+            <div className="px-4 py-3 rounded-xl border border-text-secondary/10 bg-surface text-[12.5px] text-text-secondary">
               Slack workspace connected.
             </div>
           )}
           {status === 'error' && (
-            <div className="px-4 py-3 rounded-xl border border-mist bg-paper text-[12.5px] text-ink">
+            <div className="px-4 py-3 rounded-xl border border-text-secondary/10 bg-surface text-[12.5px] text-text-primary">
               Connect failed{reason ? `: ${reason}` : '.'}
             </div>
           )}
 
-          {loading && <p className="text-[13px] text-stone">Loading…</p>}
+          {loading && <p className="text-[13px] text-text-secondary">Loading…</p>}
 
           {!loading && error && (
-            <p className="text-[13px] text-ink">{error}</p>
+            <p className="text-[13px] text-text-primary">{error}</p>
           )}
 
           {!loading && workspaces.length === 0 && (
-            <div className="px-6 py-8 rounded-xl border border-mist bg-paper text-center">
-              <p className="text-[13px] text-graphite">Connect Slack to feed the brain from Slack threads.</p>
-              <p className="text-[12px] text-stone mt-2">
-                Once connected, your team can use <code className="text-ink">/brain &lt;question&gt;</code> in any channel.
+            <div className="px-6 py-8 rounded-xl border border-text-secondary/10 bg-surface text-center">
+              <p className="text-[13px] text-text-secondary">Connect Slack to feed the brain from Slack threads.</p>
+              <p className="text-[12px] text-text-secondary mt-2">
+                Once connected, your team can use <code className="text-text-primary">/brain &lt;question&gt;</code> in any channel.
               </p>
               <button
                 type="button"
                 onClick={startInstall}
-                className="mt-5 px-4 py-2 rounded-xl bg-ink text-white text-[12px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity"
+                className="mt-5 px-4 py-2 rounded-xl bg-accent text-white text-[12px] uppercase tracking-[0.16em] hover:opacity-90 transition-opacity"
               >
                 Add to Slack
               </button>
@@ -125,36 +126,36 @@ export function SlackSettings() {
             const channels = channelsByWs[ws.id] ?? []
             const isLoading = loadingChannels[ws.id]
             return (
-              <section key={ws.id} className="px-5 py-4 rounded-xl border border-mist bg-white">
+              <section key={ws.id} className="px-5 py-4 rounded-xl border border-text-secondary/10 bg-white">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-[13.5px] font-medium text-ink">{ws.slack_team_name}</p>
-                    <p className="text-[10.5px] text-stone mt-0.5">
+                    <p className="text-[13.5px] font-medium text-text-primary">{ws.slack_team_name}</p>
+                    <p className="text-[10.5px] text-text-secondary mt-0.5">
                       Installed {new Date(ws.installed_at).toLocaleString()}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => disconnect(ws.id)}
-                    className="text-[10.5px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+                    className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
                   >
                     Disconnect
                   </button>
                 </div>
 
                 <div className="mt-4">
-                  <p className="text-[10.5px] uppercase tracking-[0.16em] text-stone mb-2">
+                  <p className="text-[10.5px] uppercase tracking-[0.16em] text-text-secondary mb-2">
                     Channels feeding the brain
                   </p>
-                  {isLoading && <p className="text-[12px] text-stone">Loading channels…</p>}
+                  {isLoading && <p className="text-[12px] text-text-secondary">Loading channels…</p>}
                   {!isLoading && channels.length === 0 && (
-                    <p className="text-[12px] text-stone">No channels visible. Invite the Penlo bot to channels first.</p>
+                    <p className="text-[12px] text-text-secondary">No channels visible. Invite the Penlo bot to channels first.</p>
                   )}
                   {!isLoading && channels.length > 0 && (
                     <ul className="space-y-1">
                       {channels.map((c) => (
                         <li key={c.id} className="flex items-center justify-between">
-                          <span className="text-[12.5px] text-ink">#{c.name}</span>
+                          <span className="text-[12.5px] text-text-primary">#{c.name}</span>
                           <label className="inline-flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
@@ -162,7 +163,7 @@ export function SlackSettings() {
                               onChange={(e) => toggleSubscription(ws.id, c, e.target.checked)}
                               className="accent-ink"
                             />
-                            <span className="text-[11px] text-stone">
+                            <span className="text-[11px] text-text-secondary">
                               {c.is_subscribed ? 'Subscribed' : 'Off'}
                             </span>
                           </label>
@@ -172,7 +173,7 @@ export function SlackSettings() {
                   )}
                 </div>
 
-                <p className="mt-4 text-[10.5px] text-stone">
+                <p className="mt-4 text-[10.5px] text-text-secondary">
                   Slash command results show public nodes only; team-private nodes are excluded.
                 </p>
               </section>
@@ -183,7 +184,7 @@ export function SlackSettings() {
             <button
               type="button"
               onClick={startInstall}
-              className="text-[11px] uppercase tracking-[0.16em] text-stone hover:text-ink transition-colors"
+              className="text-[11px] uppercase tracking-[0.16em] text-text-secondary hover:text-text-primary transition-colors"
             >
               + Connect another workspace
             </button>
