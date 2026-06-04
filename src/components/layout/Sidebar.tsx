@@ -13,7 +13,6 @@ import {
   Menu,
   MessageSquare,
   Send,
-  Settings,
   Shield,
   Sparkles,
   Users,

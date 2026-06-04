@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { TopBar } from '../components/layout/TopBar'
-import { Button, SettingsSection } from '../components/ui'
+import { SettingsSection } from '../components/ui'
 import { notificationsApi } from '../lib/api/endpoints'
 import { useNotificationStore } from '../store/notificationStore'
 import type { PageProps } from '../types/layout'

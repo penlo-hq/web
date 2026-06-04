@@ -28,10 +28,12 @@ export function DraftDetailPanel({ draft, onViewInBrain, onDelete, onCitationCli
     )
   }
 
+  const d = draft
+
   async function handleCopy() {
-    if (!draft.detail) return
+    if (!d.detail) return
     try {
-      await navigator.clipboard.writeText(draft.detail)
+      await navigator.clipboard.writeText(d.detail)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -42,7 +44,7 @@ export function DraftDetailPanel({ draft, onViewInBrain, onDelete, onCitationCli
   async function confirmRemove() {
     setDeleting(true)
     try {
-      await onDelete(draft.id)
+      await onDelete(d.id)
       setConfirmDelete(false)
     } finally {
       setDeleting(false)
