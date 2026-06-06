@@ -24,7 +24,7 @@ export function TopBar({ title, subtitle, onMenuClick, actions, useTimelineEyebr
       : subtitle ?? null
 
   return (
-    <div className="px-5 py-3.5 flex items-center gap-3 border-b border-black/[0.06] bg-canvas/80 backdrop-blur-sm sticky top-0 z-10">
+    <div className="px-5 py-3.5 flex items-center gap-3 border-b border-border bg-canvas/95 backdrop-blur-sm sticky top-0 z-10">
       {onMenuClick && <MobileMenuButton onClick={onMenuClick} />}
       <div className="min-w-0 flex-1">
         {eyebrow && (
@@ -45,7 +45,7 @@ export function TopBar({ title, subtitle, onMenuClick, actions, useTimelineEyebr
       {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       <button
         type="button"
-        className="relative w-9 h-9 flex items-center justify-center rounded-xl text-text-secondary hover:text-text-primary hover:bg-black/[0.04] focus-ring shrink-0"
+        className="relative min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl text-text-secondary hover:text-text-primary hover:bg-accent-tint focus-ring shrink-0"
         aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
         onClick={togglePanel}
       >

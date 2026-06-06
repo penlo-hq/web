@@ -6,7 +6,7 @@ export function RoleGuide() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden">
+    <div className="rounded-2xl border border-border bg-white overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -29,11 +29,11 @@ export function RoleGuide() {
         />
       </button>
       {open && (
-        <div className="px-4 pb-4 grid gap-3 sm:grid-cols-3 border-t border-black/[0.06] pt-4">
+        <div className="px-4 pb-4 grid gap-3 sm:grid-cols-3 border-t border-border pt-4">
           {ROLE_META.map((role) => (
             <div
               key={role.value}
-              className="rounded-xl border border-black/[0.06] bg-canvas px-3.5 py-3"
+              className="rounded-xl border border-border bg-canvas px-3.5 py-3"
             >
               <p className="text-[13px] font-semibold text-text-primary">{role.label}</p>
               <p className="text-[12px] text-text-secondary mt-1 leading-relaxed">{role.description}</p>

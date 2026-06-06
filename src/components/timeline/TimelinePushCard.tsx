@@ -55,7 +55,7 @@ export function TimelinePushCard({ push, selected, onSelect }: Props) {
       className={`w-full text-left px-3 py-3 rounded-xl border transition-all focus-ring ${
         selected
           ? 'border-accent bg-accent/5 shadow-sm'
-          : 'border-black/[0.08] bg-white hover:border-accent/25 hover:bg-black/[0.02]'
+          : 'border-border bg-white hover:border-accent/25 hover:bg-black/[0.02]'
       }`}
     >
       <div className="flex items-start gap-2 mb-1">
@@ -92,7 +92,7 @@ export function TimelinePushCard({ push, selected, onSelect }: Props) {
           {push.nodes.map((n) => (
             <span
               key={n.id}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-black/[0.08] text-[10.5px] text-text-primary bg-black/[0.02]"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border text-[10.5px] text-text-primary bg-black/[0.02]"
             >
               <span className="font-medium">{n.label}</span>
               <span className="text-text-tertiary">

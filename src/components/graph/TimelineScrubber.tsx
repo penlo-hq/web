@@ -84,7 +84,7 @@ export function TimelineScrubber({ pushes, snapshots, isLive, position, onSeek }
   })
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-white border-t border-black/[0.06]">
+    <div className="flex items-center gap-3 px-4 py-3 bg-white border-t border-border">
       <span className="text-[9.5px] uppercase tracking-[0.2em] text-text-tertiary w-16 shrink-0">
         Timeline
       </span>

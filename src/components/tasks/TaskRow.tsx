@@ -44,7 +44,7 @@ export function TaskRow({ task, actionError, onStatusChange, onViewInBrain }: Pr
       className={`flex flex-col gap-2 px-4 py-3.5 bg-white border rounded-2xl transition-all group ${
         isFailed
           ? 'border-destructive/20 hover:border-destructive/30'
-          : 'border-black/[0.06] hover:border-black/[0.12] hover:shadow-card'
+          : 'border-border hover:border-black/[0.12] hover:shadow-card'
       }`}
     >
       <div className="flex items-start gap-3">

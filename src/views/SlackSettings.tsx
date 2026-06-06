@@ -5,6 +5,8 @@ import { AlertCircle, CheckCircle2, Plus, RefreshCw, X } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { TopBar } from '../components/layout/TopBar'
 import { useAuthStore } from '../store/authStore'
+import { useBillingStore } from '../store/billingStore'
+import { UpgradePrompt } from '../components/billing/UpgradePrompt'
 import { slackApi, type SlackStatusDTO, type SlackWorkspaceDTO } from '../lib/api/endpoints'
 import { ConfirmModal, Skeleton } from '../components/ui'
 import { SlackSetupGuide } from '../components/slack/SlackSetupGuide'
@@ -20,6 +22,8 @@ type Banner =
 
 export function SlackSettings({ onMenuClick }: PageProps) {
   const user = useAuthStore((s) => s.user)
+  const billing = useBillingStore((s) => s.billing)
+  const slackAllowed = billing?.features.slack !== false
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -164,15 +168,22 @@ export function SlackSettings({ onMenuClick }: PageProps) {
             </div>
           ) : (
             <>
-              {slackStatus && (
+              {!slackAllowed && (
+                <UpgradePrompt
+                  feature="slack"
+                  message="Slack integration is included on the Team plan. Upgrade to connect channels and feed meetings into the Brain."
+                />
+              )}
+
+              {slackStatus && slackAllowed && (
                 <SlackSetupGuide slackStatus={slackStatus} />
               )}
 
               {!hasWorkspaces ? (
                 <SlackEmptyState
-                  oauthConfigured={slackStatus?.oauth_configured ?? false}
+                  oauthConfigured={slackAllowed && (slackStatus?.oauth_configured ?? false)}
                   connecting={connecting}
-                  onConnect={() => void startConnect()}
+                  onConnect={() => slackAllowed && void startConnect()}
                 />
               ) : (
                 <div className="space-y-3">
@@ -195,7 +206,7 @@ export function SlackSettings({ onMenuClick }: PageProps) {
                           type="button"
                           onClick={() => void startConnect()}
                           disabled={connecting}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/[0.08] bg-white text-[12px] font-medium text-text-secondary hover:text-text-primary hover:border-black/[0.14] transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-white text-[12px] font-medium text-text-secondary hover:text-text-primary hover:border-black/[0.14] transition-colors disabled:opacity-50"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           Add workspace
@@ -217,7 +228,7 @@ export function SlackSettings({ onMenuClick }: PageProps) {
               )}
 
               <div className="pt-2 pb-4">
-                <div className="rounded-2xl border border-black/[0.06] bg-canvas px-4 py-3.5">
+                <div className="rounded-2xl border border-border bg-canvas px-4 py-3.5">
                   <p className="text-[12px] font-semibold text-text-primary mb-1">How ingest works</p>
                   <p className="text-[12px] text-text-secondary leading-relaxed">
                     Every message in a <span className="font-medium text-text-primary">subscribed</span> channel feeds the Company Brain in real time.

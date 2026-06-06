@@ -27,6 +27,8 @@ import { LandingView } from './views/LandingView'
 import { PricingView } from './views/PricingView'
 import { OnboardingView } from './views/OnboardingView'
 import { NotificationSettings } from './views/NotificationSettings'
+import { BillingSettings } from './views/BillingSettings'
+import { TeamBrain } from './views/TeamBrain'
 import { useAuthStore } from './store/authStore'
 import { wsClient } from './lib/ws/client'
 
@@ -104,6 +106,8 @@ function PrivateLayout() {
               <Route path="/onboarding" element={<OnboardingView {...menuProps} />} />
               <Route path="/brain/ask" element={<BrainQuery {...menuProps} />} />
               <Route path="/brain/company" element={<CompanyBrain {...menuProps} />} />
+              <Route path="/brain/team" element={<TeamBrain {...menuProps} />} />
+              <Route path="/brain/team/:teamId" element={<TeamBrain {...menuProps} />} />
               <Route path="/brain/me" element={<MyBrain {...menuProps} />} />
               <Route path="/timeline" element={<Timeline {...menuProps} />} />
               <Route path="/tasks" element={<Tasks {...menuProps} />} />
@@ -117,6 +121,7 @@ function PrivateLayout() {
               <Route path="/slack-settings" element={<SlackSettings {...menuProps} />} />
               <Route path="/linear-settings" element={<RequireAdmin><LinearSettings {...menuProps} /></RequireAdmin>} />
               <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard {...menuProps} /></RequireAdmin>} />
+              <Route path="/admin/billing" element={<RequireAdmin><BillingSettings {...menuProps} /></RequireAdmin>} />
               <Route path="/admin/teams" element={<RequireAdmin><TeamManagement {...menuProps} /></RequireAdmin>} />
               <Route path="/admin/permissions" element={<RequireAdminOrLead><TeamPermissions {...menuProps} /></RequireAdminOrLead>} />
               <Route path="*" element={<Navigate to="/brain/company" replace />} />

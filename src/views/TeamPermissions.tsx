@@ -5,6 +5,8 @@ import { AlertCircle, RefreshCw, Search, UserPlus, Users } from 'lucide-react'
 import { TopBar } from '../components/layout/TopBar'
 import { InviteMemberModal } from '../components/admin/InviteMemberModal'
 import { RoleGuide } from '../components/permissions/RoleGuide'
+import { YourTeamPanel } from '../components/teams/YourTeamPanel'
+import { TeamsGuide } from '../components/teams/TeamsGuide'
 import { MemberRow } from '../components/permissions/MemberRow'
 import { InvitationRow } from '../components/permissions/InvitationRow'
 import { roleLabel } from '../components/permissions/roleConfig'
@@ -33,6 +35,7 @@ function mapRoleError(err: unknown): string {
 export function TeamPermissions({ onMenuClick }: PageProps) {
   const user = useAuthStore((s) => s.user)
   const isAdmin = user?.role === 'admin'
+  const isTeamLead = user?.role === 'team_lead'
 
   const [members, setMembers] = useState<AdminUserDTO[]>([])
   const [teams, setTeams] = useState<TeamDTO[]>([])
@@ -187,17 +190,32 @@ export function TeamPermissions({ onMenuClick }: PageProps) {
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-          {!isAdmin && (
+          {!isAdmin && !isTeamLead && (
             <div className="flex gap-3 px-4 py-3 rounded-xl border border-violet-500/20 bg-violet-500/[0.06]">
               <Users className="w-5 h-5 text-violet-700 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[13px] font-medium text-text-primary">View-only access</p>
                 <p className="text-[12px] text-text-secondary mt-0.5 leading-relaxed">
-                  You can see your company directory. Only admins can change roles, send invites, or revoke pending invites.
+                  You can see your company directory. Only admins can change roles; team leads manage their own team.
                 </p>
               </div>
             </div>
           )}
+
+          {isTeamLead && (
+            <div className="flex gap-3 px-4 py-3 rounded-xl border border-accent/20 bg-accent-tint/30">
+              <Users className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[13px] font-medium text-text-primary">Team lead</p>
+                <p className="text-[12px] text-text-secondary mt-0.5 leading-relaxed">
+                  You can invite and manage members on your team. Admins handle company-wide roles and team settings.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <TeamsGuide />
+          <YourTeamPanel />
 
           {error && (
             <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-200 bg-red-50">
@@ -238,7 +256,7 @@ export function TeamPermissions({ onMenuClick }: PageProps) {
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             {isAdmin && (
-              <div className="inline-flex p-1 rounded-xl bg-black/[0.04] border border-black/[0.06] self-start">
+              <div className="inline-flex p-1 rounded-xl bg-black/[0.04] border border-border self-start">
                 <TabButton active={tab === 'members'} onClick={() => setTab('members')}>
                   Members ({members.length})
                 </TabButton>
@@ -256,11 +274,11 @@ export function TeamPermissions({ onMenuClick }: PageProps) {
                 placeholder={
                   tab === 'invites' && isAdmin ? 'Search invites by email…' : 'Search by name or email…'
                 }
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-black/[0.08] bg-white text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/15 disabled:opacity-50"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-white text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/15 disabled:opacity-50"
                 aria-label="Search members"
               />
             </div>
-            {isAdmin && (
+            {(isAdmin || isTeamLead) && (
               <Button size="sm" onClick={() => setInviteOpen(true)} className="shrink-0 gap-1.5">
                 <UserPlus className="w-4 h-4" />
                 Invite member
@@ -377,8 +395,13 @@ export function TeamPermissions({ onMenuClick }: PageProps) {
         </div>
       </div>
 
-      {isAdmin && (
-        <InviteMemberModal isOpen={inviteOpen} onClose={onInviteClose} teamId={null} teamName={null} />
+      {(isAdmin || isTeamLead) && (
+        <InviteMemberModal
+          isOpen={inviteOpen}
+          onClose={onInviteClose}
+          teamId={isTeamLead ? user?.team_id ?? null : null}
+          teamName={isTeamLead ? user?.team_name ?? null : null}
+        />
       )}
 
       <ConfirmModal
@@ -415,7 +438,7 @@ export function TeamPermissions({ onMenuClick }: PageProps) {
 
 function StatCard({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-black/[0.08] bg-white px-4 py-3">
+    <div className="rounded-xl border border-border bg-white px-4 py-3">
       <p className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide">{label}</p>
       <p className={`text-[22px] font-semibold tabular-nums mt-0.5 ${accent ? 'text-accent' : 'text-text-primary'}`}>
         {value}

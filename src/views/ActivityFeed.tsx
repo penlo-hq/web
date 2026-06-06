@@ -164,7 +164,7 @@ export function ActivityFeed({ onMenuClick }: PageProps) {
                   type="button"
                   disabled={loadingMore}
                   onClick={loadOlder}
-                  className="px-4 py-2 rounded-xl border border-black/[0.08] text-[12px] font-medium text-text-secondary hover:text-text-primary hover:bg-black/[0.03] transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl border border-border text-[12px] font-medium text-text-secondary hover:text-text-primary hover:bg-black/[0.03] transition-colors disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading…' : 'Load older activity'}
                 </button>

@@ -161,7 +161,7 @@ export function Node3D({
             className={`max-w-[200px] rounded-lg border px-2.5 py-1.5 shadow-sm backdrop-blur-sm ${
               isSelected
                 ? 'border-accent/30 bg-white/95'
-                : 'border-black/[0.08] bg-white/90'
+                : 'border-border bg-white/90'
             }`}
           >
             <p

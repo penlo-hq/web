@@ -19,7 +19,7 @@ export function DraftListItem({ draft, selected, onSelect }: Props) {
       className={`w-full text-left px-3.5 py-3 rounded-xl border transition-all focus-ring ${
         selected
           ? 'border-accent/40 bg-accent/[0.06] shadow-sm'
-          : 'border-black/[0.06] bg-white hover:border-black/[0.12] hover:shadow-card'
+          : 'border-border bg-white hover:border-black/[0.12] hover:shadow-card'
       }`}
     >
       <div className="flex items-start gap-2.5">

@@ -65,7 +65,7 @@ export function GitHubDefaultsPanel({ executorEnabled, emphasizeRequired, onRepo
       : 'No default set — set per dispatch or configure here'
 
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white overflow-hidden">
+    <div className="rounded-2xl border border-border bg-white overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -82,7 +82,7 @@ export function GitHubDefaultsPanel({ executorEnabled, emphasizeRequired, onRepo
         {open ? <ChevronUp className="w-4 h-4 text-text-tertiary" /> : <ChevronDown className="w-4 h-4 text-text-tertiary" />}
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-black/[0.06] space-y-3">
+        <div className="px-4 pb-4 pt-1 border-t border-border space-y-3">
           {loadError && (
             <p className="text-[12px] text-text-secondary">{loadError}</p>
           )}

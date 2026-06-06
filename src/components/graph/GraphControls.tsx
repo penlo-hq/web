@@ -43,7 +43,7 @@ export function GraphControls() {
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search nodes…"
         aria-label="Search graph nodes"
-        className="w-full px-3 py-2.5 text-[14px] border border-black/[0.08] rounded-xl bg-canvas text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/15 transition-all"
+        className="w-full px-3 py-2.5 text-[14px] border border-border rounded-xl bg-canvas text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/15 transition-all"
       />
 
       <p className="text-[11px] text-text-tertiary hidden sm:block">

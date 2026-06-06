@@ -21,13 +21,13 @@ function CopyField({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-[11px] font-medium text-text-tertiary uppercase tracking-wide mb-1.5">{label}</p>
       <div className="flex items-stretch gap-2">
-        <code className="flex-1 min-w-0 text-[11.5px] text-text-primary bg-canvas border border-black/[0.08] rounded-lg px-3 py-2 break-all font-mono">
+        <code className="flex-1 min-w-0 text-[11.5px] text-text-primary bg-canvas border border-border rounded-lg px-3 py-2 break-all font-mono">
           {value}
         </code>
         <button
           type="button"
           onClick={() => void doCopy()}
-          className="inline-flex items-center gap-1 px-3 rounded-lg border border-black/[0.08] bg-white hover:bg-black/[0.03] text-[11px] font-medium text-text-secondary hover:text-text-primary transition-colors shrink-0"
+          className="inline-flex items-center gap-1 px-3 rounded-lg border border-border bg-white hover:bg-black/[0.03] text-[11px] font-medium text-text-secondary hover:text-text-primary transition-colors shrink-0"
           aria-label={`Copy ${label}`}
         >
           {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -103,7 +103,7 @@ export function SlackSetupGuide({ slackStatus }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden">
+    <div className="rounded-2xl border border-border bg-white overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -125,7 +125,7 @@ export function SlackSetupGuide({ slackStatus }: Props) {
       </button>
 
       {open && (
-        <div className="border-t border-black/[0.06] px-4 py-5 space-y-5">
+        <div className="border-t border-border px-4 py-5 space-y-5">
           {slackStatus.oauth_configured ? (
             <div className="space-y-3">
               <CopyField label="Events API Request URL" value={slackStatus.events_webhook_url} />
@@ -158,7 +158,7 @@ export function SlackSetupGuide({ slackStatus }: Props) {
             ))}
           </ol>
 
-          <div className="rounded-xl bg-canvas border border-black/[0.06] px-3.5 py-3">
+          <div className="rounded-xl bg-canvas border border-border px-3.5 py-3">
             <p className="text-[11.5px] font-semibold text-text-primary mb-1">Testing</p>
             <p className="text-[12px] text-text-secondary">
               Once channels are subscribed, type <code className="text-[11px] bg-black/[0.04] rounded px-1 py-0.5">/brain who owns the API redesign?</code> in any

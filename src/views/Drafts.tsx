@@ -95,7 +95,7 @@ export function Drafts({ onMenuClick }: PageProps) {
         subtitle="Admin · communications & onboarding briefs"
       />
       <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-        <div className="px-5 py-4 border-b border-black/[0.06] bg-white/60 shrink-0">
+        <div className="px-5 py-4 border-b border-border bg-white/60 shrink-0">
           <div className="mx-auto max-w-6xl space-y-3">
             <p className="text-[13px] text-text-secondary leading-relaxed max-w-2xl">
               Review and manage brain-generated drafts before sharing with your team. Generate
@@ -129,7 +129,7 @@ export function Drafts({ onMenuClick }: PageProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search drafts…"
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-black/[0.06] bg-white text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/25"
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-white text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/25"
                 aria-label="Search drafts"
               />
             </div>

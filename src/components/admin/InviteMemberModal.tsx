@@ -53,7 +53,14 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
       const result = await authApi.createInvite({ email: trimmed, role, team_id: teamId })
       setInvite(result)
     } catch (e: unknown) {
-      const detail = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      const rawDetail = (e as { response?: { data?: { detail?: unknown }; status?: number } })?.response?.data?.detail
+      const status = (e as { response?: { status?: number } })?.response?.status
+      if (status === 402 && rawDetail && typeof rawDetail === 'object' && 'message' in rawDetail) {
+        setError(String((rawDetail as { message: string }).message))
+        setSubmitting(false)
+        return
+      }
+      const detail = typeof rawDetail === 'string' ? rawDetail : undefined
       const msg =
         detail === 'user_exists'
           ? 'Someone with that email is already on your team.'
@@ -99,10 +106,10 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[480px] bg-white rounded-2xl border border-black/[0.08] shadow-xl"
+        className="w-full max-w-[480px] bg-white rounded-2xl border border-border shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-black/[0.06]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
               <Mail className="w-4 h-4 text-accent" />
@@ -138,7 +145,7 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full px-3 py-2.5 rounded-xl border border-black/[0.08] text-[14px] focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/15"
+                    className="w-full px-3 py-2.5 rounded-xl border border-border text-[14px] focus:outline-none focus:border-accent/40 focus:ring-2 focus:ring-accent/15"
                     autoFocus
                     onKeyDown={(e) => e.key === 'Enter' && void submit()}
                   />
@@ -155,7 +162,7 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
                           className={`flex gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
                             selected
                               ? 'border-accent bg-accent/[0.04] ring-1 ring-accent/20'
-                              : 'border-black/[0.08] hover:border-black/[0.14]'
+                              : 'border-border hover:border-black/[0.14]'
                           }`}
                         >
                           <input
@@ -212,7 +219,7 @@ export function InviteMemberModal({ isOpen, onClose, teamId, teamName }: Props) 
                 <input
                   readOnly
                   value={invite.invite_url}
-                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-black/[0.08] text-[12px] text-text-primary bg-canvas focus:outline-none"
+                  className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-border text-[12px] text-text-primary bg-canvas focus:outline-none"
                   onFocus={(e) => e.currentTarget.select()}
                   aria-label="Invite link"
                 />

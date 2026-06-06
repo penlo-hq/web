@@ -93,7 +93,7 @@ export function OnboardingView({ onMenuClick }: PageProps) {
                   <div className={`flex items-start gap-3 p-4 rounded-2xl border transition-all ${
                     done
                       ? 'bg-success-tint border-success/20'
-                      : 'bg-white border-black/[0.06] hover:border-black/[0.12] hover:shadow-card'
+                      : 'bg-white border-border hover:border-black/[0.12] hover:shadow-card'
                   }`}>
                     {/* Check toggle */}
                     <button
@@ -134,7 +134,7 @@ export function OnboardingView({ onMenuClick }: PageProps) {
             })}
           </ol>
 
-          <div className="mt-8 pt-5 border-t border-black/[0.06]">
+          <div className="mt-8 pt-5 border-t border-border">
             <button
               onClick={() => {
                 try {

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+import { Logomark } from '../brand/Logo'
 
 type Props = {
   title: string
@@ -11,12 +11,12 @@ type Props = {
 
 export function AuthLayout({ title, subtitle, children, footer }: Props) {
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center px-5 py-12">
+    <div className="min-h-screen bg-surface-muted flex flex-col items-center justify-center px-5 py-12">
       <div className="w-full max-w-[380px]">
         {/* Penlo logo mark */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mb-4 shadow-card-raised">
-            <Sparkles className="w-6 h-6 text-white" strokeWidth={2} />
+          <div className="mb-4 shadow-card-raised rounded-2xl overflow-hidden">
+            <Logomark size="lg" />
           </div>
           <p className="text-[11px] font-semibold tracking-[0.10em] text-text-tertiary uppercase mb-1.5">
             Penlo
@@ -32,7 +32,7 @@ export function AuthLayout({ title, subtitle, children, footer }: Props) {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-[20px] shadow-card-raised p-6 border border-black/[0.06]">
+        <div className="bg-canvas rounded-[20px] shadow-card-raised p-6 border border-border">
           {children}
         </div>
 

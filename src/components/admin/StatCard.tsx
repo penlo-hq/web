@@ -22,7 +22,7 @@ type Props = {
 export function StatCard({ label, value, sublabel, icon }: Props) {
   const Icon = icon ? ICONS[icon] : null
   return (
-    <dl className="px-4 py-4 rounded-2xl bg-white border border-black/[0.06] relative overflow-hidden hover:shadow-card-hover transition-shadow">
+    <dl className="px-4 py-4 rounded-2xl bg-white border border-border relative overflow-hidden hover:shadow-card-hover transition-shadow">
       {Icon && (
         <div className="absolute top-3 right-3 w-7 h-7 rounded-lg bg-accent-tint flex items-center justify-center">
           <Icon className="w-3.5 h-3.5 text-accent" strokeWidth={1.75} />

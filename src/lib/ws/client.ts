@@ -11,6 +11,17 @@ import { api } from '../api/client'
 const WS_BASE = import.meta.env.VITE_WS_URL ?? 'ws://localhost:8000'
 const COUNT_DEBOUNCE_MS = 2000
 
+// Only graph-mutating events must wait for the initial graph hydration before they
+// can be applied incrementally. Everything else (notifications, dispatch/broadcast
+// badges, activity feed) is independent of the graph and must be delivered live —
+// otherwise the bell, toasts, and pending counts stay dead until a Brain graph view
+// is opened.
+const GRAPH_EVENT_TYPES: ReadonlySet<string> = new Set([
+  'node_added',
+  'node_updated',
+  'edge_added',
+])
+
 class BrainWSClient {
   private ws: WebSocket | null = null
   private companyId: string | null = null
@@ -120,7 +131,7 @@ class BrainWSClient {
   }
 
   private _handle(msg: WSMessage): void {
-    if (!useGraphStore.getState().isHydrated) {
+    if (GRAPH_EVENT_TYPES.has(msg.type) && !useGraphStore.getState().isHydrated) {
       this._buffer.push(msg)
       return
     }
@@ -139,12 +150,6 @@ class BrainWSClient {
       case 'edge_added':
         store.addEdge(msg.payload)
         break
-      case 'edge_removed':
-        store.removeEdge(msg.payload.id)
-        break
-      case 'graph_snapshot':
-        store.setGraph(msg.payload.nodes, msg.payload.edges)
-        break
       case 'ingestion_event': {
         const p = msg.payload
         if (!p.event_id) break
@@ -158,7 +163,7 @@ class BrainWSClient {
           user_id: p.user_id,
           user_name: p.user_name,
         })
-        if (!window.location.pathname.startsWith('/activity')) {
+        if (!window.location.pathname.startsWith('/timeline')) {
           useActivityStore.getState().incrementUnread()
         }
         break
