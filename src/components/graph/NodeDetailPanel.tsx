@@ -9,6 +9,7 @@ import { NODE_TYPE_LABEL } from '../../types/graph'
 import { nodeApi } from '../../lib/api/endpoints'
 import { useGraphStore } from '../../store/graphStore'
 import { useAuthStore } from '../../store/authStore'
+import { useNotificationStore } from '../../store/notificationStore'
 
 type Archaeology = {
   source_event: {
@@ -46,6 +47,7 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
   const setSelected = useGraphStore((s) => s.setSelected)
   const updateNode = useGraphStore((s) => s.updateNode)
   const user = useAuthStore((s) => s.user)
+  const addToast = useNotificationStore((s) => s.addToast)
   const [detail, setDetail] = useState<NodeDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<Tab>('overview')
@@ -141,6 +143,13 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
     try {
       await nodeApi.resolveAlert(selectedId, keepNodeId)
       setDetail((d) => (d ? { ...d, alert: d.alert ? { ...d.alert, resolved: true } : d.alert } : d))
+    } catch {
+      addToast({
+        title: "Couldn't resolve conflict",
+        body: 'The alert could not be resolved. Please try again.',
+        severity: 'important',
+        sticky: false,
+      })
     } finally {
       setResolving(null)
     }
@@ -155,7 +164,7 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 320, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-          className="absolute right-0 top-0 h-full w-full max-w-[min(360px,38vw)] min-w-[280px] bg-white/95 backdrop-blur-md border-l border-black/[0.08] shadow-[-8px_0_32px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden z-20"
+          className="absolute right-0 top-0 h-full w-full max-w-[min(360px,38vw)] min-w-[280px] bg-white/95 backdrop-blur-md border-l border-border shadow-[-8px_0_32px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden z-20"
         >
           <div className="flex items-start justify-between px-5 pt-5 pb-3">
             <div className="min-w-0 flex-1 pr-2">
@@ -315,7 +324,7 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
                           key={n.id}
                           type="button"
                           onClick={() => setSelected(n.id)}
-                          className="inline-flex items-center gap-1.5 max-w-full px-2.5 py-1.5 rounded-lg border border-black/[0.08] bg-canvas hover:border-accent/30 hover:bg-accent/5 transition-colors text-left focus-ring"
+                          className="inline-flex items-center gap-1.5 max-w-full px-2.5 py-1.5 rounded-lg border border-border bg-canvas hover:border-accent/30 hover:bg-accent/5 transition-colors text-left focus-ring"
                         >
                           <span className="text-[9px] font-semibold uppercase tracking-wide text-accent shrink-0">
                             {NODE_TYPE_LABEL[n.type]}
@@ -328,7 +337,7 @@ export function NodeDetailPanel({ selectedId, onClose }: Props) {
                 )}
 
                 {node && !loading && (
-                  <div className="pt-3 border-t border-black/[0.06]">
+                  <div className="pt-3 border-t border-border">
                     <div className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary mb-2">Properties</div>
                     <div className="text-[12px] text-text-tertiary space-y-1">
                       <div>Last seen: <span className="text-text-secondary">{new Date(node.last_seen_at).toLocaleDateString()}</span></div>

@@ -16,7 +16,7 @@ export function GraphLegend({ nodeCount, edgeCount, selectedLabel }: Props) {
         : 'Free — explore the graph'
 
   return (
-    <div className="pointer-events-none rounded-xl border border-black/[0.08] bg-white/92 backdrop-blur-sm px-3 py-2.5 shadow-sm max-w-[240px]">
+    <div className="pointer-events-none rounded-xl border border-border bg-white/92 backdrop-blur-sm px-3 py-2.5 shadow-sm max-w-[240px]">
       <p className="text-[11px] font-medium text-text-primary tabular-nums">
         {nodeCount} nodes · {edgeCount} edges
       </p>

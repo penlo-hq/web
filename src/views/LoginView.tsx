@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '../lib/api/endpoints'
 import { publicApi } from '../lib/api/client'
-import { AuthLayout, AuthFooterLink } from '../components/ui'
+import { AuthLayout, AuthFooterLink, Button } from '../components/ui'
 
 declare global {
   interface Window {
@@ -192,14 +192,9 @@ export function LoginView() {
         )}
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full h-11 mt-1 rounded-xl bg-accent text-white font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-60 transition-colors focus-ring"
-        >
-          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+        <Button type="submit" loading={loading} className="w-full mt-1" size="lg">
           {loading ? 'Signing in…' : 'Sign in'}
-        </button>
+        </Button>
       </form>
 
       {googleClientId && (

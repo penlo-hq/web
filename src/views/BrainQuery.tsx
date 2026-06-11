@@ -43,6 +43,13 @@ function extractApiError(err: unknown): string {
     if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg)
     if (err.response?.status === 401) return 'Session expired — sign in again.'
     if (err.response?.status === 429) return 'Too many questions — wait a moment and try again.'
+    if (err.response?.status === 402) {
+      const detail = err.response?.data?.detail
+      if (detail && typeof detail === 'object' && 'message' in detail) {
+        return String((detail as { message: string }).message)
+      }
+      return 'Query limit reached — upgrade to Team for unlimited queries.'
+    }
     if (err.code === 'ERR_NETWORK') {
       return "Can't reach the Brain API. Check that it's running and VITE_API_URL is correct."
     }
@@ -214,7 +221,7 @@ export function BrainQuery({ onMenuClick }: Props) {
                   key={prompt}
                   type="button"
                   onClick={() => setInput(prompt)}
-                  className="px-4 py-2.5 rounded-xl border border-black/[0.08] bg-surface text-[13px] text-text-secondary hover:bg-black/[0.04] hover:text-text-primary hover:border-black/[0.14] transition-all text-left"
+                  className="px-4 py-2.5 rounded-xl border border-border bg-surface text-[13px] text-text-secondary hover:bg-black/[0.04] hover:text-text-primary hover:border-black/[0.14] transition-all text-left"
                 >
                   {prompt}
                 </button>
@@ -288,7 +295,7 @@ function MessageRow({
     return (
       <div className="flex items-start gap-2.5 max-w-[720px] w-full">
         <BrainAvatar />
-        <div className="flex-1 min-w-0 rounded-2xl border border-black/[0.06] bg-surface px-4 py-3.5 shadow-sm">
+        <div className="flex-1 min-w-0 rounded-2xl border border-border bg-surface px-4 py-3.5 shadow-sm">
           <div className="flex items-center gap-1.5 h-6" aria-label="Thinking">
             <span className="w-1.5 h-1.5 rounded-full bg-accent/70 animate-pulse" style={{ animationDelay: '0ms' }} />
             <span className="w-1.5 h-1.5 rounded-full bg-accent/70 animate-pulse" style={{ animationDelay: '150ms' }} />
@@ -351,7 +358,7 @@ function BrainAnswerBubble({
   return (
     <div className="flex items-start gap-2.5 max-w-[720px] w-full animate-fade-in">
       <BrainAvatar />
-      <div className="flex-1 min-w-0 rounded-2xl border border-black/[0.06] bg-surface px-4 py-3.5 shadow-sm">
+      <div className="flex-1 min-w-0 rounded-2xl border border-border bg-surface px-4 py-3.5 shadow-sm">
         {message.subAgent && (
           <div className="text-[11px] font-medium text-accent mb-2 capitalize">
             {message.subAgent} specialist
@@ -434,7 +441,7 @@ function QueryFeedbackRow({ queryId, question, answer }: { queryId: string; ques
   }
 
   return (
-    <div className="mt-3 flex items-center gap-2 pt-2 border-t border-black/[0.06]">
+    <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border">
       <span className="text-caption-sm text-text-secondary">Helpful?</span>
       <button
         type="button"

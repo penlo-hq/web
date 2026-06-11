@@ -46,7 +46,7 @@ export function TasksToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search tasks…"
-          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-black/[0.06] bg-white text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/30"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-white text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent/30"
           aria-label="Search tasks"
         />
       </div>

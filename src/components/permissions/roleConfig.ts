@@ -28,8 +28,8 @@ export const ROLE_META: RoleMeta[] = [
     description: 'Leads a team — can run Dispatch and Outbox, with team-scoped private context.',
     capabilities: [
       'Approve dispatch and broadcast drafts',
-      'View team directory (this page)',
-      'Access team-private Brain nodes',
+      'Invite and manage members on your team',
+      'View Team Brain and team-private nodes',
     ],
   },
   {
@@ -58,6 +58,6 @@ export function roleBadgeClass(role: string): string {
     case 'team_lead':
       return 'bg-violet-500/10 text-violet-700 border-violet-500/20'
     default:
-      return 'bg-black/[0.04] text-text-secondary border-black/[0.08]'
+      return 'bg-black/[0.04] text-text-secondary border-border'
   }
 }

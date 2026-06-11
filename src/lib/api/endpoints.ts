@@ -10,6 +10,7 @@ import type {
   Draft,
   User,
 } from '../../types/graph'
+import type { BillingSnapshot, PlansCatalogDTO } from '../../types/billing'
 
 type GraphResponse = { nodes: GraphNode[]; edges: GraphEdge[] }
 type SnapshotResponse = GraphResponse & { snapshot_at: string | null }
@@ -178,9 +179,13 @@ export type ApiKeyEntry = {
   last_used_at: string | null
 }
 
+// The create endpoint returns the one-time raw `key` but NOT `last_used_at`
+// (a brand-new key has never been used); callers fill that in locally.
+export type CreatedApiKey = Pick<ApiKeyEntry, 'id' | 'label' | 'key_prefix' | 'created_at'> & { key: string }
+
 export const apiKeysApi = {
   list: (): Promise<ApiKeyEntry[]> => api.get('/api/v1/auth/api-keys').then((r) => r.data),
-  create: (label: string): Promise<ApiKeyEntry & { key: string }> =>
+  create: (label: string): Promise<CreatedApiKey> =>
     api.post('/api/v1/auth/api-keys', { label }).then((r) => r.data),
   revoke: (id: string): Promise<void> =>
     api.delete(`/api/v1/auth/api-keys/${id}`).then((r) => r.data),
@@ -393,6 +398,7 @@ export type TeamDTO = {
   is_private: boolean
   member_count: number
   created_at: string
+  can_manage_members?: boolean
 }
 
 export type TeamMemberDTO = {
@@ -405,6 +411,7 @@ export type TeamMemberDTO = {
 
 export const teamsApi = {
   list: (): Promise<TeamDTO[]> => api.get('/api/v1/teams').then((r) => r.data),
+  mine: (): Promise<{ team: TeamDTO | null }> => api.get('/api/v1/teams/mine').then((r) => r.data),
   create: (body: { name: string; color?: string; is_private?: boolean }): Promise<TeamDTO> =>
     api.post('/api/v1/teams', body).then((r) => r.data),
   update: (id: string, body: { name?: string; color?: string; is_private?: boolean }): Promise<TeamDTO> =>
@@ -524,6 +531,17 @@ export const linearApi = {
 
 export type NotificationDTO = import('../../types/notification').NotificationDTO
 export type NotificationPreferenceDTO = import('../../types/notification').NotificationPreferenceDTO
+
+export const billingApi = {
+  plans: (): Promise<PlansCatalogDTO> =>
+    publicApi.get('/api/v1/billing/plans').then((r) => r.data),
+  status: (): Promise<BillingSnapshot> =>
+    api.get('/api/v1/billing/status').then((r) => r.data),
+  checkout: (interval: 'month' | 'year' = 'month'): Promise<{ checkout_url: string; session_id: string }> =>
+    api.post('/api/v1/billing/checkout', { interval }).then((r) => r.data),
+  portal: (): Promise<{ portal_url: string }> =>
+    api.post('/api/v1/billing/portal').then((r) => r.data),
+}
 
 export const notificationsApi = {
   list: (params: { unread_only?: boolean; limit?: number; before?: string } = {}): Promise<NotificationDTO[]> =>

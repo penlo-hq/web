@@ -8,7 +8,7 @@ type Props = {
 
 export function SlackEmptyState({ oauthConfigured, connecting, onConnect }: Props) {
   return (
-    <div className="rounded-2xl border border-black/[0.08] bg-white px-6 py-10 text-center">
+    <div className="rounded-2xl border border-border bg-white px-6 py-10 text-center">
       <div className="mx-auto w-16 h-16 rounded-2xl bg-[#4A154B]/10 flex items-center justify-center mb-5">
         <SlackLogoFull className="w-9 h-9" />
       </div>

@@ -7,7 +7,7 @@ type Props = {
 
 export function DraftPreview({ markdown, onCitationClick }: Props) {
   return (
-    <div className="rounded-xl border border-black/[0.06] bg-canvas/50 px-4 py-4 max-h-[min(70vh,640px)] overflow-y-auto">
+    <div className="rounded-xl border border-border bg-canvas/50 px-4 py-4 max-h-[min(70vh,640px)] overflow-y-auto">
       <MarkdownAnswer text={markdown} onCitationClick={onCitationClick} />
     </div>
   )

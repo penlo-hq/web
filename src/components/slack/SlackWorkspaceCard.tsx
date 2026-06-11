@@ -77,7 +77,7 @@ export function SlackWorkspaceCard({ workspace, defaultExpanded = false, onDisco
   const subscribedCount = channels.filter((c) => c.is_subscribed).length
 
   return (
-    <div className="rounded-2xl border border-black/[0.08] bg-white overflow-hidden">
+    <div className="rounded-2xl border border-border bg-white overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-4 sm:px-5">
         <div className="w-10 h-10 rounded-xl bg-[#4A154B]/10 flex items-center justify-center shrink-0">
           <PlugZap className="w-4.5 h-4.5 text-[#4A154B]" strokeWidth={1.75} />
@@ -105,7 +105,7 @@ export function SlackWorkspaceCard({ workspace, defaultExpanded = false, onDisco
             type="button"
             onClick={onDisconnect}
             title="Disconnect workspace"
-            className="p-2 rounded-lg border border-black/[0.08] text-text-tertiary hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-colors"
+            className="p-2 rounded-lg border border-border text-text-tertiary hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-colors"
             aria-label="Disconnect workspace"
           >
             <Trash2 className="w-4 h-4" />
@@ -115,7 +115,7 @@ export function SlackWorkspaceCard({ workspace, defaultExpanded = false, onDisco
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-label="Toggle channel list"
-            className="p-2 rounded-lg border border-black/[0.08] text-text-tertiary hover:text-text-primary hover:bg-black/[0.03] transition-colors"
+            className="p-2 rounded-lg border border-border text-text-tertiary hover:text-text-primary hover:bg-black/[0.03] transition-colors"
           >
             {loadingChannels && !channelsLoaded ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -127,7 +127,7 @@ export function SlackWorkspaceCard({ workspace, defaultExpanded = false, onDisco
       </div>
 
       {expanded && (
-        <div className="border-t border-black/[0.06] px-4 py-4 sm:px-5">
+        <div className="border-t border-border px-4 py-4 sm:px-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[13px] font-semibold text-text-primary">Channels feeding the Brain</p>
             <button

@@ -72,6 +72,9 @@ export type User = {
   role: 'employee' | 'team_lead' | 'admin'
   company_id: string
   team_id?: string
+  team_name?: string
+  team_color?: string
+  team_is_private?: boolean
 }
 
 export type Team = {

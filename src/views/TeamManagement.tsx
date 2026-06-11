@@ -9,6 +9,7 @@ import {
   type TeamDTO,
   type TeamMemberDTO,
 } from '../lib/api/endpoints'
+import { TeamsGuide } from '../components/teams/TeamsGuide'
 import type { PageProps } from '../types/layout'
 
 type CreateState = { open: boolean; name: string; color: string; is_private: boolean; submitting: boolean; error: string | null }
@@ -174,7 +175,8 @@ export function TeamManagement({ onMenuClick }: PageProps) {
           </ul>
         </aside>
 
-        <section className="flex-1 min-w-0 overflow-y-auto px-5 py-6">
+        <section className="flex-1 min-w-0 overflow-y-auto px-5 py-6 space-y-6">
+          <TeamsGuide />
           {selected ? (
             <TeamDetail team={selected} onChanged={refresh} />
           ) : (

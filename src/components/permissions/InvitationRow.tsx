@@ -17,7 +17,7 @@ export function InvitationRow({ invite, revoking, onRevoke }: Props) {
   const daysLeft = daysUntil(invite.expires_at)
 
   return (
-    <li className="flex items-center gap-3 px-4 py-3.5 sm:px-5 sm:py-4 rounded-xl border border-black/[0.08] bg-white">
+    <li className="flex items-center gap-3 px-4 py-3.5 sm:px-5 sm:py-4 rounded-xl border border-border bg-white">
       <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
         <Mail className="w-4 h-4 text-amber-700" strokeWidth={1.75} />
       </div>

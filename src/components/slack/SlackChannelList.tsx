@@ -43,7 +43,7 @@ export function SlackChannelList({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter channels…"
-            className="w-full pl-8 pr-3 py-2 rounded-lg border border-black/[0.08] text-[12.5px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 bg-white"
+            className="w-full pl-8 pr-3 py-2 rounded-lg border border-border text-[12.5px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 bg-white"
             aria-label="Filter channels"
           />
         </div>
@@ -52,7 +52,7 @@ export function SlackChannelList({
           onClick={onRefresh}
           disabled={loading}
           title="Refresh channels (run after inviting the bot to new channels)"
-          className="p-2 rounded-lg border border-black/[0.08] bg-white hover:bg-black/[0.03] text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+          className="p-2 rounded-lg border border-border bg-white hover:bg-black/[0.03] text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
           aria-label="Refresh channels"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
@@ -162,7 +162,7 @@ function ChannelRow({
         ? 'border-black/[0.05] bg-canvas opacity-60'
         : channel.is_subscribed
           ? 'border-accent/20 bg-accent/[0.03]'
-          : 'border-black/[0.08] bg-white hover:border-black/[0.12]'
+          : 'border-border bg-white hover:border-black/[0.12]'
     }`}>
       <div className="flex items-center gap-2 min-w-0">
         {channel.is_private ? (

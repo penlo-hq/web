@@ -9,7 +9,7 @@ type Props = {
 export function TimelineDiffBanner({ push, snapshotAt, isLive }: Props) {
   if (isLive) {
     return (
-      <div className="px-4 py-2 border-b border-black/[0.06] bg-accent/5 text-[12px] text-text-secondary">
+      <div className="px-4 py-2 border-b border-border bg-accent/5 text-[12px] text-text-secondary">
         <span className="font-semibold text-accent">Live</span> — current company graph
       </div>
     )
@@ -37,7 +37,7 @@ export function TimelineDiffBanner({ push, snapshotAt, isLive }: Props) {
       })
 
   return (
-    <div className="px-4 py-2.5 border-b border-black/[0.06] bg-white text-[12px] animate-fade-in">
+    <div className="px-4 py-2.5 border-b border-border bg-white text-[12px] animate-fade-in">
       <span className="font-semibold text-text-primary">{push.user_name || 'System'}</span>
       <span className="text-text-secondary">
         {' '}

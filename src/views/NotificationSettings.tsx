@@ -199,7 +199,7 @@ export function NotificationSettings({ onMenuClick }: PageProps) {
 
         <button
           onClick={() => void sendTest()}
-          className="px-4 py-2 rounded-xl border border-black/[0.08] text-[13px] text-text-secondary hover:text-text-primary hover:bg-black/[0.02] transition-colors"
+          className="px-4 py-2 rounded-xl border border-border text-[13px] text-text-secondary hover:text-text-primary hover:bg-black/[0.02] transition-colors"
         >
           Send test notification
         </button>

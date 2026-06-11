@@ -60,7 +60,7 @@ export function SourcesPanel({ sources, onOpenNode }: Props) {
   if (sources.length === 0) return null
 
   return (
-    <div className="mt-4 pt-3 border-t border-black/[0.08]">
+    <div className="mt-4 pt-3 border-t border-border">
       <div className="flex items-center gap-2 mb-2.5">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
           Where this came from
@@ -73,7 +73,7 @@ export function SourcesPanel({ sources, onOpenNode }: Props) {
             key={c.node_id}
             type="button"
             onClick={() => onOpenNode(c.node_id)}
-            className="text-left p-3 rounded-xl border border-black/[0.08] bg-canvas hover:border-accent/30 hover:bg-accent-tint/30 transition-all focus-ring group"
+            className="text-left p-3 rounded-xl border border-border bg-canvas hover:border-accent/30 hover:bg-accent-tint/30 transition-all focus-ring group"
           >
             <div className="flex items-start gap-2">
               <div className="w-7 h-7 rounded-lg bg-accent-tint flex items-center justify-center shrink-0 text-accent">

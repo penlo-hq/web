@@ -85,7 +85,7 @@ export function AdminDashboard({ onMenuClick }: PageProps) {
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
         <Link
           to="/admin/drafts"
-          className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-black/[0.06] bg-white hover:border-accent/30 hover:shadow-card transition-all group"
+          className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-border bg-white hover:border-accent/30 hover:shadow-card transition-all group"
         >
           <div className="w-9 h-9 rounded-xl bg-accent-tint flex items-center justify-center text-accent shrink-0">
             <FileText className="w-4 h-4" strokeWidth={1.75} />
@@ -138,20 +138,20 @@ export function AdminDashboard({ onMenuClick }: PageProps) {
               <StatCard label="Slack Workspaces" value={stats.slack_workspaces_connected} icon="slack" />
             </section>
 
-            <section className="p-5 rounded-2xl border border-black/[0.06] bg-white space-y-4">
+            <section className="p-5 rounded-2xl border border-border bg-white space-y-4">
               <h2 className="font-semibold text-[15px] text-text-primary tracking-[-0.01em]">Brain Health</h2>
               <BrainHealthBar label="Embedded" value={stats.brain_health.pct_embedded} />
               <BrainHealthBar label="Fresh" value={stats.brain_health.pct_fresh} />
             </section>
 
-            <section className="p-5 rounded-2xl border border-black/[0.06] bg-white space-y-3">
+            <section className="p-5 rounded-2xl border border-border bg-white space-y-3">
               <h2 className="font-semibold text-[15px] text-text-primary tracking-[-0.01em]">Nodes by Type</h2>
               <NodeTypeBreakdown byType={stats.node_counts.by_type} />
             </section>
           </>
         )}
 
-        <section className="p-5 rounded-2xl border border-black/[0.06] bg-white">
+        <section className="p-5 rounded-2xl border border-border bg-white">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-[15px] text-text-primary tracking-[-0.01em]">Team Members</h2>
           </div>
@@ -160,7 +160,7 @@ export function AdminDashboard({ onMenuClick }: PageProps) {
             <button
               type="button"
               onClick={() => loadMore(cursor)}
-              className="mt-4 px-3 py-1.5 rounded-xl border border-black/[0.08] text-[12px] text-text-secondary hover:text-text-primary hover:bg-black/[0.03] transition-colors"
+              className="mt-4 px-3 py-1.5 rounded-xl border border-border text-[12px] text-text-secondary hover:text-text-primary hover:bg-black/[0.03] transition-colors"
             >
               Load more
             </button>

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Button } from './Button'
 import { Card } from './Card'
 
@@ -22,21 +23,38 @@ export function ConfirmModal({
   onConfirm,
   onCancel,
 }: Props) {
+  const cancelRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    cancelRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onCancel])
+
   if (!open) return null
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/35"
       role="dialog"
-      aria-modal
+      aria-modal="true"
       aria-labelledby="confirm-title"
+      onClick={onCancel}
     >
-      <Card shadow className="w-full max-w-sm bg-canvas !p-5">
+      <Card
+        shadow
+        className="w-full max-w-sm bg-canvas !p-5"
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      >
         <h2 id="confirm-title" className="text-headline text-text-primary mb-2">
           {title}
         </h2>
         <p className="text-caption text-text-secondary mb-5">{message}</p>
         <div className="flex gap-2 justify-end">
-          <Button variant="secondary" size="sm" onClick={onCancel}>
+          <Button ref={cancelRef} variant="secondary" size="sm" onClick={onCancel}>
             {cancelLabel}
           </Button>
           <Button

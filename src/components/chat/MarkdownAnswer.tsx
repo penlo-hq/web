@@ -152,7 +152,7 @@ export function MarkdownAnswer({ text, citationIds, onCitationClick }: Props) {
             return (
               <p
                 key={idx}
-                className="text-[13px] text-text-secondary pt-2 border-t border-black/[0.06] flex items-start gap-1.5"
+                className="text-[13px] text-text-secondary pt-2 border-t border-border flex items-start gap-1.5"
               >
                 <span aria-hidden>📎</span>
                 <span>{renderWithCitations(block.text.replace(/^📎\s*/, ''), `s-${idx}`)}</span>

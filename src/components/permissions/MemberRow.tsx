@@ -24,7 +24,7 @@ export function MemberRow({
   onRoleChange,
 }: Props) {
   return (
-    <li className="flex items-center gap-3 px-4 py-3.5 sm:px-5 sm:py-4 rounded-xl border border-black/[0.08] bg-white hover:border-black/[0.12] transition-colors">
+    <li className="flex items-center gap-3 px-4 py-3.5 sm:px-5 sm:py-4 rounded-xl border border-border bg-white hover:border-black/[0.12] transition-colors">
       <MemberAvatar name={member.name} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">

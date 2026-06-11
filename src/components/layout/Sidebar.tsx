@@ -4,6 +4,7 @@ import {
   Activity,
   Bell,
   Building2,
+  CreditCard,
   ClipboardList,
   FileText,
   GitBranch,
@@ -26,6 +27,8 @@ import { useActivityStore } from '../../store/activityStore'
 import { publicApi } from '../../lib/api/client'
 import { broadcastsApi, dispatchApi } from '../../lib/api/endpoints'
 import { Badge } from '../ui/Badge'
+import { Logomark } from '../brand/Logo'
+import { Avatar } from '../ui/Avatar'
 
 type NavItem = {
   to: string
@@ -47,6 +50,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { to: '/brain/ask', label: 'Ask Brain', icon: Sparkles },
       { to: '/brain/company', label: 'Company Brain', icon: Building2 },
+      { to: '/brain/team', label: 'Team Brain', icon: Users },
       { to: '/brain/me', label: 'My Brain', icon: GitBranch },
       { to: '/timeline', label: 'Timeline', icon: Activity },
     ],
@@ -74,6 +78,7 @@ const NAV_SECTIONS: NavSection[] = [
     adminOnly: true,
     items: [
       { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: true },
+      { to: '/admin/billing', label: 'Billing', icon: CreditCard, adminOnly: true },
       { to: '/admin/drafts', label: 'Drafts', icon: FileText, adminOnly: true },
     ],
   },
@@ -88,16 +93,6 @@ const NAV_SECTIONS: NavSection[] = [
 
 function canSeeAdminOrLead(role: string | undefined): boolean {
   return role === 'admin' || role === 'team_lead'
-}
-
-function initials(name?: string): string {
-  if (!name) return '?'
-  return name
-    .split(/\s+/)
-    .map((p) => p[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
 }
 
 type SidebarProps = {
@@ -127,7 +122,7 @@ function NavItemRow({
         `flex items-center gap-3 px-3 py-2 rounded-xl transition-colors focus-ring group ${
           isActive
             ? 'bg-accent-tint text-accent'
-            : 'text-text-primary hover:bg-black/[0.04]'
+            : 'text-text-primary hover:bg-accent-tint/50'
         }`
       }
     >
@@ -207,9 +202,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
       {/* Header */}
       <div className="px-4 pt-5 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center shrink-0">
-            <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={2} />
-          </div>
+          <Logomark size="sm" className="shrink-0" />
           <div>
             <div className="font-semibold text-[13px] leading-tight text-text-primary tracking-[-0.01em]">
               Penlo
@@ -257,17 +250,15 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
       </nav>
 
       {/* Footer: user identity + sign out */}
-      <div className="px-3 py-3 border-t border-black/[0.06]">
+      <div className="px-3 py-3 border-t border-border">
         <div className="flex items-center gap-2.5 px-1 mb-2">
-          <div className="w-8 h-8 rounded-full bg-accent-tint text-accent flex items-center justify-center text-[11px] font-semibold shrink-0">
-            {initials(user?.name)}
-          </div>
+          <Avatar name={user?.name} size="md" />
           <div className="min-w-0 flex-1">
             <div className="text-[13px] font-medium text-text-primary truncate leading-tight">
               {user?.name}
             </div>
             <div className="text-[11px] text-text-tertiary truncate leading-tight">
-              {user?.email}
+              {user?.team_name ? `${user.team_name} · ` : ''}{user?.email}
             </div>
           </div>
         </div>
@@ -294,13 +285,13 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-[260px] shrink-0 h-screen flex-col bg-surface border-r border-black/[0.06]">
+      <aside className="hidden md:flex w-[260px] shrink-0 h-screen flex-col bg-surface border-r border-border">
         {navContent}
       </aside>
 
       {/* Mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[260px] flex flex-col bg-surface border-r border-black/[0.06] transform transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-[260px] flex flex-col bg-surface border-r border-border transform transition-transform duration-300 ease-out md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

@@ -55,8 +55,8 @@ export function DraftDetailPanel({ draft, onViewInBrain, onDelete, onCitationCli
 
   return (
     <>
-      <div className="flex flex-col h-full min-h-0 rounded-2xl border border-black/[0.06] bg-white overflow-hidden">
-        <div className="px-4 py-3.5 border-b border-black/[0.06] space-y-2 shrink-0">
+      <div className="flex flex-col h-full min-h-0 rounded-2xl border border-border bg-white overflow-hidden">
+        <div className="px-4 py-3.5 border-b border-border space-y-2 shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-[16px] font-semibold text-text-primary leading-snug">{draft.label}</h2>

@@ -56,8 +56,8 @@ export function TimelinePushFeed({
   }, [visible])
 
   return (
-    <div className="flex flex-col h-full border-r border-black/[0.06] bg-canvas/50">
-      <div className="px-3 py-3 border-b border-black/[0.06]">
+    <div className="flex flex-col h-full border-r border-border bg-canvas/50">
+      <div className="px-3 py-3 border-b border-border">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-text-tertiary mb-2">
           Context pushes
         </p>

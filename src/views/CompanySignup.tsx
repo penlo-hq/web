@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { authApi } from '../lib/api/endpoints'
 import { extractApiError } from '../lib/api/errors'
 import { useAuthStore } from '../store/authStore'
-import { AuthLayout, AuthFooterLink } from '../components/ui'
+import { AuthLayout, AuthFooterLink, Button } from '../components/ui'
 
 function PasswordStrength({ password }: { password: string }) {
   const len = password.length
@@ -179,14 +179,9 @@ export function CompanySignup() {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full h-11 mt-1 rounded-xl bg-accent text-white font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-accent/90 disabled:opacity-60 transition-colors focus-ring"
-        >
-          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+        <Button type="submit" loading={loading} className="w-full mt-1" size="lg">
           {loading ? 'Creating…' : 'Create company'}
-        </button>
+        </Button>
       </form>
     </AuthLayout>
   )

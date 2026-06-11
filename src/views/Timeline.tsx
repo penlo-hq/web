@@ -10,6 +10,7 @@ import { TimelinePushFeed } from '../components/timeline/TimelinePushFeed'
 import { graphApi, timelineApi, type TimelinePushDTO } from '../lib/api/endpoints'
 import type { GraphSnapshotMarker } from '../lib/api/endpoints'
 import { useGraphStore } from '../store/graphStore'
+import { useActivityStore } from '../store/activityStore'
 import type { PageProps } from '../types/layout'
 
 export function Timeline({ onMenuClick }: PageProps) {
@@ -23,6 +24,7 @@ export function Timeline({ onMenuClick }: PageProps) {
   const setSelected = useGraphStore((s) => s.setSelected)
   const setGraph = useGraphStore((s) => s.setGraph)
   const setTimelineAt = useGraphStore((s) => s.setTimelineAt)
+  const clearActivityUnread = useActivityStore((s) => s.clearUnread)
 
   const [pushes, setPushes] = useState<TimelinePushDTO[]>([])
   const [snapshots, setSnapshots] = useState<GraphSnapshotMarker[]>([])
@@ -138,6 +140,11 @@ export function Timeline({ onMenuClick }: PageProps) {
     if (match) selectPush(match, false)
   }, [highlightEvent, pushes, selectPush])
 
+  // Viewing the timeline clears the sidebar "new activity" badge.
+  useEffect(() => {
+    clearActivityUnread()
+  }, [clearActivityUnread])
+
   const handleSeek = useCallback(
     (position: number, live: boolean) => {
       setScrubPosition(position)
@@ -232,7 +239,7 @@ export function Timeline({ onMenuClick }: PageProps) {
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <TimelineDiffBanner push={selectedPush} snapshotAt={activeSnapshotAt} isLive={isLive} />
 
-          <div className="flex-1 relative mx-3 mt-2 rounded-2xl border border-black/[0.06] overflow-hidden bg-white min-h-0">
+          <div className="flex-1 relative mx-3 mt-2 rounded-2xl border border-border overflow-hidden bg-white min-h-0">
             {graphLoading && (
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
                 <span className="text-[13px] text-text-secondary">Loading graph…</span>
@@ -252,7 +259,7 @@ export function Timeline({ onMenuClick }: PageProps) {
             <NodeDetailPanel selectedId={selectedId} onClose={() => setSelected(null)} />
           </div>
 
-          <div className="mx-3 mb-3 rounded-b-2xl border-x border-b border-black/[0.06] overflow-hidden">
+          <div className="mx-3 mb-3 rounded-b-2xl border-x border-b border-border overflow-hidden">
             <TimelineScrubber
               pushes={pushes}
               snapshots={snapshots}
@@ -265,7 +272,7 @@ export function Timeline({ onMenuClick }: PageProps) {
       </div>
 
       {/* Mobile: push list below graph */}
-      <div className="md:hidden border-t border-black/[0.06] max-h-[40vh] flex flex-col">
+      <div className="md:hidden border-t border-border max-h-[40vh] flex flex-col">
         <TimelinePushFeed
           pushes={pushes}
           selectedId={selectedPushId}
