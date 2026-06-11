@@ -70,6 +70,7 @@ export function BillingSettings({ onMenuClick }: PageProps) {
     setError(null)
     try {
       const { checkout_url } = await billingApi.checkout(interval)
+      if (!checkout_url.startsWith('https://')) throw new Error('invalid_url')
       window.location.href = checkout_url
     } catch (e: unknown) {
       const detail = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
@@ -83,6 +84,7 @@ export function BillingSettings({ onMenuClick }: PageProps) {
     setError(null)
     try {
       const { portal_url } = await billingApi.portal()
+      if (!portal_url.startsWith('https://')) throw new Error('invalid_url')
       window.location.href = portal_url
     } catch (e: unknown) {
       const detail = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail

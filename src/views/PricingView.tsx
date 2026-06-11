@@ -71,6 +71,7 @@ export function PricingView() {
     setCheckoutLoading(true)
     try {
       const { checkout_url } = await billingApi.checkout(annual ? 'year' : 'month')
+      if (!checkout_url.startsWith('https://')) throw new Error('invalid_url')
       window.location.href = checkout_url
     } catch {
       navigate('/admin/billing')
